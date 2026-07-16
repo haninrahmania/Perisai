@@ -6,16 +6,16 @@
  */
 
 export const NAVIGATOR_FALLBACKS = {
-  generic: `Maaf, aku lagi tidak bisa menjawab dengan baik sekarang — ada gangguan teknis di sisiku, bukan karena pertanyaan kamu.
+  generic: `Maaf, aku lagi tidak bisa menjawab dengan baik sekarang — ada gangguan teknis di sisiku.
 
-Yang tetap bisa kamu lakukan sekarang: bukti kamu sudah aman tersimpan di Perisai, dan surat-surat laporan kamu masih bisa dibuka dan disalin dari halaman Laporan.
+Perisai adalah pendamping untuk korban Kekerasan Berbasis Gender Online. Kalau kamu korban: bukti kamu tetap aman tersimpan, dan surat laporan kamu masih bisa dibuka dan disalin dari halaman Laporan.
 
 Kalau kamu butuh orang sungguhan untuk menemani, ini beberapa yang menangani kasus seperti ini setiap hari:
 - LBH APIK Jakarta — bantuan hukum untuk perempuan korban kekerasan
 - SAFEnet — pendampingan kasus kekerasan berbasis gender online
 - Komnas Perempuan — pengaduan dan rujukan
 
-Sebelum menghubungi, siapkan kronologi singkat dan daftar bukti kamu — keduanya sudah ada di Perisai.`,
+Sebelum menghubungi, siapkan kronologi singkat dan daftar bukti kamu.`,
 
   hukuman: `Iya, penyebaran konten seperti ini bisa diproses secara hukum di Indonesia — kamu tidak sedang mengada-ada.
 
