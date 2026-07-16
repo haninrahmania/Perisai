@@ -1,5 +1,6 @@
 'use client';
 import { useState } from 'react';
+import { notFound } from 'next/navigation';
 import { ensureSession } from '@/lib/supabase';
 import { addEvidence, listEvidence } from '@/lib/evidence';
 import { generateCertificate } from '@/lib/certificate';
@@ -26,6 +27,8 @@ const MAYA_CTX = {
 
 
 export default function DevPage() {
+  if (process.env.NODE_ENV === 'production') notFound();
+
   const [log, setLog] = useState<string[]>([]);
   const say = (s: string) => setLog((l) => [...l, s]);
   const [convo, setConvo] = useState<{ role: 'user' | 'model'; text: string }[]>([]);
