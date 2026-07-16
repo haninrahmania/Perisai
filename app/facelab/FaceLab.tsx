@@ -33,7 +33,7 @@ export default function FaceLab() {
         );
 
         // Same crop face-api uses internally: extractFaces on the ALIGNED rect.
-        const det = await faceapi.detectSingleFace(img).withFaceLandmarks();
+        const det = (await faceapi.detectSingleFace(img).withFaceLandmarks())!;
         const [canvas] = await faceapi.extractFaces(img, [det.alignedRect]);
         log(`crop size: ${canvas.width}x${canvas.height}`);
 
@@ -44,7 +44,7 @@ export default function FaceLab() {
         faceapi.nets.faceRecognitionNet.forwardInput(new faceapi.NetInput([x])) as any;
 
         // Variant 0 — hand the canvas straight to face-api (should be ~0; proves the crop is right)
-        const v0 = await faceapi.nets.faceRecognitionNet.computeFaceDescriptor(canvas);
+        const v0 = await faceapi.nets.faceRecognitionNet.computeFaceDescriptor(canvas) as Float32Array;
         log(`v0 canvas → computeFaceDescriptor : ${drift(v0)}`);
 
         // Variant 1 — what we did before: naive resize, no pad, default halfPixelCenters
