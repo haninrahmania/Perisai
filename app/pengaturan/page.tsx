@@ -48,7 +48,7 @@ export default function PengaturanPage() {
         {error && <p className="mt-3 text-[13px] text-[color:var(--fill)]">{error}</p>}
       </div>
 
-      <div className="mt-6 rounded-2xl border border-[color:var(--line)] p-5">
+      <div className="mt-6 rounded-2xl border border-[color:var(--line)] bg-[color:var(--surface)] p-5">
         <p className="text-[14px] font-medium text-[color:var(--warm)]">
           Kalau device kamu bisa dibuka orang lain
         </p>

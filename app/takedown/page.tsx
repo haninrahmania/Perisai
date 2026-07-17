@@ -253,7 +253,7 @@ export default function TakedownPage() {
           value={relationship}
           onChange={(e) => setRelationship(e.target.value)}
           placeholder="mis. mantan pasangan — boleh dikosongkan"
-          className="mt-3 w-full rounded-xl border border-[color:var(--line)] bg-[color:var(--night)] px-4 py-3.5 text-[14px] text-[color:var(--warm)] placeholder:text-[#5b7183] focus:border-[color:var(--mist)] focus:outline-none"
+          className="mt-3 w-full rounded-xl border border-[color:var(--line)] bg-[color:var(--night)] px-4 py-3.5 text-[14px] text-[color:var(--warm)] placeholder:text-[#a394c4] focus:border-[color:var(--mist)] focus:outline-none"
         />
       </div>
 
@@ -281,7 +281,7 @@ export default function TakedownPage() {
                         : 'border-[color:var(--line)] text-[color:var(--muted)]'
                     }`}
                   >
-                    {needsIdentity ? 'Butuh NIK' : 'Cukup nama, tanpa NIK'}
+                    {needsIdentity ? 'Butuh NIK & KTP' : 'Tanpa identitas'}
                   </span>
                 </div>
                 {dest && (
@@ -303,16 +303,24 @@ export default function TakedownPage() {
                   <button
                     onClick={() => generate(target)}
                     disabled={busy !== null}
-                    className="w-full rounded-xl bg-[color:var(--surface-2)] px-4 py-3.5 text-[14px] text-[color:var(--warm)] transition-colors hover:bg-[#2c4c68] disabled:opacity-50"
+                    className="w-full rounded-xl bg-[color:var(--surface-2)] px-4 py-3.5 text-[14px] text-[color:var(--warm)] transition-colors hover:bg-[#9a9aef] disabled:opacity-50"
                   >
-                    {busy === target ? 'Menyusun laporan…' : 'Susun naskahnya'}
+                    {busy === target
+                      ? 'Menyusun laporan…'
+                      : target === 'komdigi'
+                        ? 'Buat aduan ke Komdigi'
+                        : 'Susun naskahnya'}
                   </button>
                 ) : (
                   <button
                     onClick={() => setOpen(isOpen ? null : target)}
                     className="w-full rounded-xl border border-[color:var(--line)] px-4 py-3.5 text-[14px] text-[color:var(--warm)]"
                   >
-                    {isOpen ? 'Tutup naskah' : 'Buka naskah'}
+                    {isOpen
+                      ? 'Tutup naskah'
+                      : target === 'komdigi'
+                        ? 'Buat aduan ke Komdigi'
+                        : 'Buka naskah'}
                   </button>
                 )}
               </div>
@@ -331,10 +339,7 @@ export default function TakedownPage() {
 
               {letter && isOpen && target === 'komdigi' && (
                 <div className="mt-4">
-                  <KomdigiHelper
-                    screenshotCount={evidence.filter((e) => e.kind === 'screenshot').length}
-                    defaultReason={letter}
-                  />
+                  <KomdigiHelper defaultReason={letter} />
                 </div>
               )}
 
@@ -388,7 +393,7 @@ export default function TakedownPage() {
         })}
       </div>
 
-      <div className="mt-10 rounded-2xl border border-[color:var(--line)] p-5">
+      <div className="mt-10 rounded-2xl border border-[color:var(--line)] bg-[color:var(--surface)] p-5">
         <p className="text-[14px] font-medium text-[color:var(--warm)]">Yang tersimpan, yang tidak</p>
         <p className="mt-2 text-[13px] leading-relaxed text-[color:var(--muted)]">
           Naskah suratnya tersimpan, jadi kamu tidak perlu menyusunnya ulang. Tapi data yang kamu

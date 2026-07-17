@@ -61,7 +61,7 @@ export default function SertifikatPage() {
         </div>
       </div>
 
-      <div className="mt-6 space-y-4 rounded-2xl border border-[color:var(--line)] p-5">
+      <div className="mt-6 space-y-4 rounded-2xl border border-[color:var(--line)] bg-[color:var(--surface)] p-5">
         <div>
           <p className="text-[14px] font-medium text-[color:var(--warm)]">Yang membuatnya kuat</p>
           <p className="mt-2 text-[13px] leading-relaxed text-[color:var(--muted)]">

@@ -181,7 +181,7 @@ export default function VaultPage() {
               onChange={(e) => setSourceUrl(e.target.value)}
               inputMode="url"
               placeholder="https://…"
-              className="mt-2 w-full rounded-xl border border-[color:var(--line)] bg-[color:var(--night)] px-4 py-4 font-mono text-[13px] text-[color:var(--warm)] placeholder:text-[#5b7183] focus:border-[color:var(--mist)] focus:outline-none"
+              className="mt-2 w-full rounded-xl border border-[color:var(--line)] bg-[color:var(--night)] px-4 py-4 font-mono text-[13px] text-[color:var(--warm)] placeholder:text-[#a394c4] focus:border-[color:var(--mist)] focus:outline-none"
             />
             <p className="mt-2 text-[12px] leading-relaxed text-[color:var(--muted)]">
               Kami tidak membuka tautannya. Yang tersimpan hanya alamatnya.
@@ -245,7 +245,7 @@ export default function VaultPage() {
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="mis. dikirim teman lewat DM"
-                className="mt-2 w-full rounded-xl border border-[color:var(--line)] bg-[color:var(--night)] px-4 py-3.5 text-[14px] text-[color:var(--warm)] placeholder:text-[#5b7183] focus:border-[color:var(--mist)] focus:outline-none"
+                className="mt-2 w-full rounded-xl border border-[color:var(--line)] bg-[color:var(--night)] px-4 py-3.5 text-[14px] text-[color:var(--warm)] placeholder:text-[#a394c4] focus:border-[color:var(--mist)] focus:outline-none"
               />
             </div>
             <div>
@@ -285,8 +285,8 @@ export default function VaultPage() {
 
       {!loading && rows.length === 0 && (
         <div className="mt-14 border-t border-[color:var(--line)] pt-10">
-          <div className="rounded-2xl border border-[color:var(--line)] px-6 py-12 text-center">
-            <p className="font-display text-[19px] leading-snug text-[color:var(--warm)]">
+          <div className="rounded-2xl border border-[color:var(--line)] bg-[color:var(--surface)] px-6 py-12 text-center">
+            <p className="font-display text-[19px] leading-snug text-[color:var(--heading)]">
               Brankas kamu masih kosong.
             </p>
             <p className="mx-auto mt-3 max-w-[300px] text-[14px] leading-relaxed text-[color:var(--muted)]">
@@ -301,7 +301,7 @@ export default function VaultPage() {
         <div className="mt-14 border-t border-[color:var(--line)] pt-10">
           <div className="flex items-end justify-between gap-4">
             <div>
-              <h2 className="font-display text-[22px] leading-tight text-[color:var(--warm)]">
+              <h2 className="font-display text-[22px] leading-tight text-[color:var(--heading)]">
                 Brankas kamu
               </h2>
               <p className="mt-1.5 text-[13px] text-[color:var(--muted)]">

@@ -49,6 +49,11 @@ export default function DashboardPage() {
           note="Naskah untuk platform, Komdigi, dan polisi"
         />
         <Row
+          href="/pendamping"
+          title="Tanya Pendamping Perisai"
+          note="Chat soal laporan, bukti, atau langkah berikutnya"
+        />
+        <Row
           href="/sertifikat"
           title="Sertifikat bukti"
           note="PDF berisi daftar bukti dan sidik digitalnya"
@@ -56,7 +61,7 @@ export default function DashboardPage() {
         <Row href="/pengaturan" title="Data kamu" note="Hapus bukti atau seluruh data" />
       </nav>
 
-      <div className="mt-10 rounded-2xl border border-[color:var(--line)] p-5">
+      <div className="mt-10 rounded-2xl border border-[color:var(--line)] bg-[color:var(--surface)] p-5">
         <p className="text-[14px] font-medium text-[color:var(--warm)]">Kamu tidak harus sendiri</p>
         <p className="mt-2 text-[13px] leading-relaxed text-[color:var(--muted)]">
           LBH APIK, Komnas Perempuan, dan SAFEnet mendampingi kasus seperti ini tanpa biaya. Mereka
@@ -77,7 +82,7 @@ export default function DashboardPage() {
 function Stat({ value, label }: { value: number | string; label: string }) {
   return (
     <div className="rounded-2xl border border-[color:var(--line)] bg-[color:var(--surface)] p-4">
-      <p className="font-display text-[28px] font-semibold leading-none text-[color:var(--warm)]">
+      <p className="font-display text-[28px] font-semibold leading-none text-[color:var(--heading)]">
         {value}
       </p>
       <p className="mt-2 text-[12px] leading-snug text-[color:var(--muted)]">{label}</p>
@@ -89,7 +94,7 @@ function Row({ href, title, note }: { href: string; title: string; note: string 
   return (
     <Link
       href={href}
-      className="flex items-center justify-between gap-4 rounded-2xl border border-[color:var(--line)] px-5 py-5 transition-colors hover:bg-[color:var(--surface)]"
+      className="flex items-center justify-between gap-4 rounded-2xl border border-[color:var(--line)] bg-[color:var(--surface)] px-5 py-5 transition-colors hover:bg-[color:var(--surface-2)]"
     >
       <span>
         <span className="block text-[15px] text-[color:var(--warm)]">{title}</span>

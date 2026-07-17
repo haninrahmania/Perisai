@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect } from 'react';
 import { ensureSession } from '@/lib/supabase';
@@ -10,28 +11,21 @@ export default function Home() {
   }, []);
 
   return (
-    <main className="mx-auto flex min-h-dvh w-full max-w-[540px] flex-col px-5 py-10">
-      <div className="flex items-center gap-3">
-        <svg width="20" height="23" viewBox="0 0 26 30" fill="none" aria-hidden="true">
-          <path
-            d="M13 1.5 24 5.2v9.1c0 6.6-4.5 12.4-11 14.2C6.5 26.7 2 20.9 2 14.3V5.2L13 1.5Z"
-            stroke="var(--mist)"
-            strokeWidth="1.6"
-            strokeLinejoin="round"
-          />
-        </svg>
-        <span className="font-display text-[17px] tracking-tight text-[color:var(--warm)]">
-          Perisai
-        </span>
-      </div>
-
+    <main className="mx-auto flex min-h-dvh w-full max-w-[540px] flex-col bg-[#adb5e5] px-5 py-10">
       <div className="flex flex-1 flex-col justify-center py-14">
-        <h1 className="font-display text-[32px] font-semibold leading-[1.15] tracking-tight text-[color:var(--warm)]">
+        <div className="mb-8 flex items-center gap-4">
+          <Image src="/perisai_final.png" alt="" width={140} height={147} priority />
+          <span className="font-display text-[44px] font-semibold leading-none tracking-tight text-[#1a2140]">
+            perisai
+          </span>
+        </div>
+
+        <h1 className="font-display text-[32px] font-semibold leading-[1.15] tracking-tight text-[#1a2140]">
           Apa pun yang terjadi,
           <br />
           kamu tidak salah.
         </h1>
-        <p className="mt-4 max-w-[360px] text-[15px] leading-relaxed text-[color:var(--muted)]">
+        <p className="mt-4 max-w-[360px] text-[15px] leading-relaxed text-[#3d4570]">
           Perisai menemani kamu mengamankan bukti, menyusun laporan, dan menemukan pendamping dalam
           satu langkah kecil setiap kali.
         </p>
@@ -39,7 +33,7 @@ export default function Home() {
         <div className="mt-12 space-y-3">
           <Link
             href="/triage"
-            className="block rounded-2xl bg-[color:var(--mist)] px-6 py-7 text-[#0F1D2B] transition-colors hover:bg-[#96bccb]"
+            className="block rounded-2xl bg-[#2d3561] px-6 py-7 text-white transition-colors hover:bg-[#3d4570]"
           >
             <span className="block text-[18px] font-semibold leading-snug">
               Aku butuh bantuan sekarang
@@ -49,13 +43,17 @@ export default function Home() {
             </span>
           </Link>
 
-
+          <Link
+            href="/pendamping"
+            className="flex min-h-[56px] w-full items-center justify-center rounded-2xl border border-[#2d3561]/25 px-5 py-4 text-center text-[15px] font-medium text-[#1a2140] transition-colors hover:bg-white/25"
+          >
+            Tanya dulu, aku belum tahu harus mulai dari mana
+          </Link>
         </div>
       </div>
 
-      <p className="text-[12px] leading-relaxed text-[color:var(--muted)]">
-        Tanpa nama, tanpa email. Yang kamu simpan di sini milik kamu, dan bisa kamu hapus kapan
-        pun.
+      <p className="text-[12px] leading-relaxed text-[#3d4570]">
+        Tanpa nama, tanpa email. Yang kamu simpan di sini milik kamu, dan bisa kamu hapus kapan pun.
       </p>
     </main>
   );
