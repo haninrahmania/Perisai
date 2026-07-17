@@ -1,89 +1,181 @@
 import { jsPDF } from 'jspdf';
+import type { CaseRecord, EvidenceRecord } from './case-store';
 
-type EvidenceRow = {
-  id: string;
-  kind: 'url' | 'screenshot';
-  source_url: string | null;
-  storage_path: string | null;
-  sha256: string;
+export type CertificateEntry = {
+  number: number;
+  evidenceId: string;
+  kind: 'url' | 'file';
+  source: string;
   platform: string | null;
   description: string | null;
-  found_at: string | null;
-  hashed_at: string;
+  foundAt: string | null;
+  hashedAt: string;
+  sha256: string;
+  hashScope: 'normalized-url-string' | 'raw-file-bytes';
 };
 
-const fmt = (iso: string | null) =>
-  iso
-    ? new Date(iso).toLocaleString('id-ID', {
-        dateStyle: 'long',
-        timeStyle: 'medium',
-        timeZone: 'Asia/Jakarta',
-      }) + ' WIB'
-    : '—';
+export type CertificateModel = {
+  title: string;
+  caseReference: string;
+  caseCreatedAt: string;
+  evidenceCount: number;
+  entries: CertificateEntry[];
+  integrityStatements: string[];
+  privacyStatements: string[];
+  disclaimer: string;
+};
 
-export function generateCertificate(rows: EvidenceRow[], caseRef: string) {
-  const doc = new jsPDF({ unit: 'mm', format: 'a4' });
-  const M = 18;              // margin
-  const W = 210 - M * 2;     // usable width
-  let y = M;
+const URL_HASH_STATEMENT =
+  'Untuk bukti URL, SHA-256 mencakup string URL yang dinormalisasi ' +
+  '(teks URL, bukan konten pada alamat tujuan).';
+const FILE_HASH_STATEMENT =
+  'Untuk bukti berkas, SHA-256 mencakup byte mentah berkas.';
+const LOCAL_STORAGE_STATEMENT =
+  'IndexedDB lokal di perangkat ini tidak terenkripsi secara bawaan. Siapa pun yang ' +
+  'memiliki akses ke profil peramban atau perangkat yang ' +
+  'terbuka mungkin dapat membacanya.';
+const RECOVERY_STATEMENT =
+  'Menghapus data situs, kehilangan perangkat, atau kehilangan profil peramban dapat ' +
+  'menghilangkan data tanpa cadangan yang diekspor.';
+const DISCLAIMER =
+  'Dokumen ini adalah manifest bukti lokal, bukan sertifikasi forensik yang ditandatangani, ' +
+  'bukan penetapan keaslian atau kepemilikan, dan bukan nasihat hukum.';
 
-  const line = (text: string, size = 10, style: 'normal' | 'bold' = 'normal', gap = 5) => {
-    doc.setFont('helvetica', style).setFontSize(size);
-    for (const l of doc.splitTextToSize(text, W)) {
-      if (y > 275) { doc.addPage(); y = M; }
-      doc.text(l, M, y);
-      y += gap;
-    }
-  };
+/**
+ * Builds the complete certificate domain value without reading the clock, browser state,
+ * persistence, or network. Only explicitly listed manifest fields are copied.
+ */
+export function buildCertificateModel(
+  activeCase: CaseRecord,
+  selectedEvidence: readonly EvidenceRecord[],
+): CertificateModel {
+  if (selectedEvidence.length === 0) {
+    throw new Error('Pilih setidaknya satu bukti untuk membuat PDF.');
+  }
 
-  // Header
-  line('SERTIFIKAT BUKTI DIGITAL', 16, 'bold', 7);
-  line('Perisai — Perlindungan Digital dari Kekerasan Berbasis AI', 10, 'normal', 6);
-  doc.setDrawColor(200).line(M, y, M + W, y);
-  y += 8;
+  if (selectedEvidence.some((evidence) => evidence.caseId !== activeCase.id)) {
+    throw new Error('Semua bukti harus berasal dari kasus yang sedang dibuka.');
+  }
 
-  line(`Nomor referensi kasus : ${caseRef}`, 10);
-  line(`Dokumen dibuat        : ${fmt(new Date().toISOString())}`, 10);
-  line(`Jumlah bukti          : ${rows.length}`, 10, 'normal', 9);
+  const entries = selectedEvidence.map<CertificateEntry>((evidence, index) => {
+    const isUrl = evidence.kind === 'url';
 
-  // Evidence entries
-  rows.forEach((r, i) => {
-    if (y > 240) { doc.addPage(); y = M; }
-    line(`BUKTI #${i + 1}`, 11, 'bold', 6);
-    line(`Jenis          : ${r.kind === 'url' ? 'Tautan (URL)' : 'Tangkapan layar'}`);
-    line(`Platform       : ${r.platform ?? '—'}`);
-    if (r.source_url) line(`Sumber         : ${r.source_url}`);
-    line(`Deskripsi      : ${r.description ?? '—'}`);
-    line(`Ditemukan pada : ${fmt(r.found_at)}`);
-    line(`Diamankan pada : ${fmt(r.hashed_at)}`);
-
-    doc.setFont('courier', 'normal').setFontSize(8);
-    const label = 'SHA-256       : ';
-    const half = r.sha256.slice(0, 32);
-    doc.text(label + half, M, y); y += 4;
-    doc.text(' '.repeat(label.length) + r.sha256.slice(32), M, y); y += 8;
+    return {
+      number: index + 1,
+      evidenceId: evidence.id,
+      kind: isUrl ? 'url' : 'file',
+      source: isUrl
+        ? (evidence.sourceUrl ?? 'URL tidak dicatat')
+        : (evidence.fileName ?? 'Berkas lokal'),
+      platform: evidence.platform ?? null,
+      description: evidence.description ?? null,
+      foundAt: evidence.foundAt,
+      hashedAt: evidence.hashedAt,
+      sha256: evidence.sha256,
+      hashScope: isUrl ? 'normalized-url-string' : 'raw-file-bytes',
+    };
   });
 
-  // Integrity statement — this is the talking point, in the artifact
-  if (y > 225) { doc.addPage(); y = M; }
-  doc.setDrawColor(200).line(M, y, M + W, y);
-  y += 8;
-  line('PERNYATAAN INTEGRITAS', 11, 'bold', 6);
-  line(
-    'Nilai hash SHA-256 di atas dihitung sepenuhnya di perangkat pelapor (client-side) ' +
-    'sebelum data dikirim ke server mana pun. Setiap perubahan sekecil apa pun pada berkas ' +
-    'atau tautan asli akan menghasilkan nilai hash yang berbeda, sehingga daftar ini dapat ' +
-    'digunakan untuk memverifikasi bahwa bukti tidak berubah sejak waktu pengamanan di atas.',
-    9, 'normal', 4.5,
-  );
-  y += 3;
-  line(
-    'Dokumen ini disusun untuk memperkuat integritas dan kronologi bukti, dan bukan merupakan ' +
-    'hasil pemeriksaan forensik digital resmi maupun nasihat hukum. Perisai tidak menyimpan ' +
-    'konten eksplisit dalam bentuk yang dapat diputar; hanya metadata, nilai hash, dan berkas ' +
-    'terenkripsi milik pelapor pada penyimpanan privat.',
-    9, 'normal', 4.5,
+  return {
+    title: 'MANIFEST BUKTI DIGITAL',
+    caseReference: activeCase.reference,
+    caseCreatedAt: activeCase.createdAt,
+    evidenceCount: entries.length,
+    entries,
+    integrityStatements: [URL_HASH_STATEMENT, FILE_HASH_STATEMENT],
+    privacyStatements: [LOCAL_STORAGE_STATEMENT, RECOVERY_STATEMENT],
+    disclaimer: DISCLAIMER,
+  };
+}
+
+/** Produces the canonical, deterministic plain-text representation of a certificate model. */
+export function buildCertificateText(model: CertificateModel): string {
+  const lines = [
+    model.title,
+    'Perisai — manifest lokal bukti digital',
+    '',
+    `Nomor referensi kasus: ${model.caseReference}`,
+    `Kasus dibuat: ${model.caseCreatedAt}`,
+    `Jumlah bukti: ${model.evidenceCount}`,
+  ];
+
+  for (const entry of model.entries) {
+    lines.push(
+      '',
+      `BUKTI #${entry.number}`,
+      `ID bukti: ${entry.evidenceId}`,
+      `Jenis: ${entry.kind === 'url' ? 'URL' : 'Berkas'}`,
+      `Sumber: ${entry.source}`,
+      `Platform: ${entry.platform ?? '—'}`,
+      `Deskripsi: ${entry.description ?? '—'}`,
+      `Ditemukan pada: ${entry.foundAt ?? '—'}`,
+      `Hash dihitung pada: ${entry.hashedAt}`,
+      `Cakupan hash: ${
+        entry.hashScope === 'normalized-url-string'
+          ? 'string URL yang dinormalisasi'
+          : 'byte mentah berkas'
+      }`,
+      `SHA-256: ${entry.sha256}`,
+    );
+  }
+
+  lines.push(
+    '',
+    'BATAS INTEGRITAS',
+    ...model.integrityStatements,
+    '',
+    'PRIVASI DAN PEMULIHAN',
+    ...model.privacyStatements,
+    '',
+    'BATAS DOKUMEN',
+    model.disclaimer,
   );
 
-  doc.save(`Sertifikat-Bukti-Perisai-${caseRef}.pdf`);
+  return lines.join('\n');
+}
+
+function safeFileName(reference: string): string {
+  const safeReference = reference.replace(/[^a-zA-Z0-9_-]+/g, '-');
+  return `Manifest-Bukti-Perisai-${safeReference || 'kasus'}.pdf`;
+}
+
+/** Browser-only rendering and download boundary. */
+export function downloadCertificate(model: CertificateModel): void {
+  const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+  const margin = 18;
+  const width = 210 - margin * 2;
+  let y = margin;
+
+  for (const textLine of buildCertificateText(model).split('\n')) {
+    const isHeading =
+      textLine === model.title ||
+      textLine.startsWith('BUKTI #') ||
+      textLine === 'BATAS INTEGRITAS' ||
+      textLine === 'PRIVASI DAN PEMULIHAN' ||
+      textLine === 'BATAS DOKUMEN';
+    const fontSize = textLine === model.title ? 16 : isHeading ? 11 : 9;
+    const gap = textLine === '' ? 3 : fontSize >= 11 ? 6 : 4.5;
+
+    doc.setFont('helvetica', isHeading ? 'bold' : 'normal').setFontSize(fontSize);
+    const wrappedLines = textLine === '' ? [''] : doc.splitTextToSize(textLine, width);
+
+    for (const wrappedLine of wrappedLines) {
+      if (y > 277) {
+        doc.addPage();
+        y = margin;
+      }
+      if (wrappedLine) doc.text(wrappedLine, margin, y);
+      y += gap;
+    }
+  }
+
+  doc.save(safeFileName(model.caseReference));
+}
+
+/** Convenience browser boundary for callers that already hold the scoped domain records. */
+export function generateCertificate(
+  activeCase: CaseRecord,
+  selectedEvidence: readonly EvidenceRecord[],
+): void {
+  downloadCertificate(buildCertificateModel(activeCase, selectedEvidence));
 }

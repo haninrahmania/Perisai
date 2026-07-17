@@ -32,6 +32,15 @@ export const EMERGENCY = {
     { name: 'SAPA 129 (Kemen PPPA)', contact: '129', note: 'Layanan pengaduan kekerasan perempuan & anak.' },
   ],
   self_harm: [
-    { name: 'SAPA 129', contact: '129', note: 'Layanan pengaduan & rujukan.' },
+    {
+      name: 'Healing119 Kementerian Kesehatan',
+      contact: '119 ekstensi 8 / healing119.id',
+      note: 'Pertolongan pertama psikologis untuk krisis dan pikiran bunuh diri.',
+    },
+    {
+      name: 'Fasilitas kesehatan terdekat',
+      contact: 'Puskesmas / IGD rumah sakit',
+      note: 'Cari pertolongan langsung jika tidak dapat terhubung atau dalam bahaya segera.',
+    },
   ],
 };
