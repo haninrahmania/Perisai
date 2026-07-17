@@ -11,7 +11,7 @@ export default function Home() {
   }, []);
 
   return (
-    <main className="mx-auto flex min-h-dvh w-full max-w-[540px] flex-col bg-[#adb5e5] px-5 py-10">
+    <main className="mx-auto flex min-h-dvh w-full max-w-[540px] flex-col px-5 py-10">
       <div className="flex flex-1 flex-col justify-center py-14">
         <div className="mb-8 flex items-center gap-4">
           <Image src="/perisai_final.png" alt="" width={140} height={147} priority />

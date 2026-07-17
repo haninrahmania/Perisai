@@ -10,6 +10,10 @@ const display = Literata({ subsets: ['latin'], variable: '--font-display' });
 export const metadata: Metadata = {
   title: 'Catatan',
   description: 'Catatan pribadi',
+  icons: {
+    icon: '/perisai_final.png',
+    apple: '/perisai_final.png',
+  },
 };
 
 export default function RootLayout({
@@ -22,10 +26,7 @@ export default function RootLayout({
       lang="id"
       className={`${body.variable} ${mono.variable} ${display.variable} h-full antialiased`}
     >
-      <body
-        className="min-h-full flex flex-col bg-[#0F1D2B] text-[#E8E4DC]"
-        suppressHydrationWarning
-      >
+      <body className="min-h-full flex flex-col" suppressHydrationWarning>
         <SessionProvider>{children}</SessionProvider>
       </body>
     </html>
