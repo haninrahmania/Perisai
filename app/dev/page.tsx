@@ -8,6 +8,7 @@ import { type TakedownTarget } from '@/lib/takedown-prompts';
 import { availableTargets } from '@/lib/targets';
 import { detectCrisis } from '@/lib/crisis';
 import { CRISIS_TEST_CASES } from '@/lib/crisis.test-cases';
+import { saveReport, listReports, updateReportStatus } from '@/lib/reports';
 
 const MAYA_EVIDENCE = [
   {
@@ -32,6 +33,28 @@ export default function DevPage() {
   const [log, setLog] = useState<string[]>([]);
   const say = (s: string) => setLog((l) => [...l, s]);
   const [convo, setConvo] = useState<{ role: 'user' | 'model'; text: string }[]>([]);
+
+  async function testReports() {
+    try {
+        const evidence = await listEvidence();
+        const ids = evidence.map((e: any) => e.id);
+
+        const r1 = await saveReport('telegram', 'draft letter v1', ids);
+        say(`saved: ${r1.id} | ${r1.target} | ${r1.status}`);
+
+        const r2 = await saveReport('telegram', 'draft letter v2', ids);
+        say(`upsert: ${r2.id === r1.id ? '✅ same row' : '❌ DUPLICATE'} | content="${r2.content}"`);
+
+        await updateReportStatus(r1.id, 'sent');
+        const r3 = await saveReport('telegram', 'draft letter v3', ids);
+        say(`status after regen: ${r3.status === 'sent' ? '✅ preserved' : '❌ reset to ' + r3.status}`);
+
+        const all = await listReports();
+        say(`listReports() → ${all.length} row(s)`);
+    } catch (e: any) {
+        say(`REPORTS ERROR: ${e.message}`);
+    }
+    }
 
   function testGate() {
     CRISIS_TEST_CASES.forEach(([input, expect]) => {
@@ -240,6 +263,8 @@ export default function DevPage() {
         </label>
         <button onClick={redteam} className="border px-3 py-1">redteam navigator</button>
         <button onClick={testGate} className="border px-3 py-1">test gate</button>
+        <button onClick={testReports} className="border px-3 py-1">test reports</button>
+
       </div>
       <pre className="whitespace-pre-wrap">{log.join('\n')}</pre>
     </div>

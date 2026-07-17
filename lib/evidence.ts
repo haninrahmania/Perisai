@@ -73,3 +73,21 @@ export async function previewUrl(storagePath: string) {
   if (error) throw error;
   return data.signedUrl;
 }
+
+export async function deleteEvidence(id: string) {
+  const { data: row, error: fetchErr } = await supabase
+    .from('evidence')
+    .select('storage_path')
+    .eq('id', id)
+    .single();
+  if (fetchErr) throw fetchErr;
+
+  // Storage first — deleting the row orphans the file otherwise.
+  if (row?.storage_path) {
+    const { error } = await supabase.storage.from('evidence').remove([row.storage_path]);
+    if (error) throw error;
+  }
+
+  const { error } = await supabase.from('evidence').delete().eq('id', id);
+  if (error) throw error;
+}
