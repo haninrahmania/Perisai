@@ -19,7 +19,8 @@ html {
 body {
   font-family: var(--font-body), system-ui, sans-serif;
   color: var(--warm);
-  background: #adb5e5;
+  background: linear-gradient(to bottom, #ffffff 0%, #ffffff 33%, #adb5e5 70%);
+  background-attachment: fixed;
 }
 
 .font-display {

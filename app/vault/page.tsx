@@ -213,29 +213,35 @@ export default function VaultPage() {
           </div>
         )}
 
+        <div className="mt-5">
+          <label className="block text-[13px] text-[color:var(--muted)]">
+            Tempat kamu melihatnya
+          </label>
+          <p className="mt-1 text-[12px] leading-relaxed text-[color:var(--muted)]">
+            Ini menentukan laporan mana yang nanti disiapkan untuk bukti ini.
+          </p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {PLATFORMS.map((p) => (
+              <button
+                key={p.value}
+                onClick={() => setPlatform(platform === p.value ? '' : p.value)}
+                className={`rounded-lg border px-3 py-2.5 text-[13px] transition-colors ${
+                  platform === p.value
+                    ? 'border-[color:var(--mist)] bg-[color:var(--surface-2)] text-[color:var(--warm)]'
+                    : 'border-[color:var(--line)] text-[color:var(--muted)]'
+                }`}
+              >
+                {p.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
         <details className="mt-5">
           <summary className="cursor-pointer list-none text-[13px] text-[color:var(--mist)]">
             Tambah keterangan (boleh dilewati) →
           </summary>
           <div className="mt-4 space-y-4">
-            <div>
-              <label className="block text-[13px] text-[color:var(--muted)]">Platform</label>
-              <div className="mt-2 flex flex-wrap gap-2">
-                {PLATFORMS.map((p) => (
-                  <button
-                    key={p.value}
-                    onClick={() => setPlatform(platform === p.value ? '' : p.value)}
-                    className={`rounded-lg border px-3 py-2.5 text-[13px] transition-colors ${
-                      platform === p.value
-                        ? 'border-[color:var(--mist)] bg-[color:var(--surface-2)] text-[color:var(--warm)]'
-                        : 'border-[color:var(--line)] text-[color:var(--muted)]'
-                    }`}
-                  >
-                    {p.label}
-                  </button>
-                ))}
-              </div>
-            </div>
             <div>
               <label htmlFor="desc" className="block text-[13px] text-[color:var(--muted)]">
                 Catatan singkat untuk kamu sendiri

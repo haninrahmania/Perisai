@@ -10,7 +10,6 @@ export type TriageAnswers = {
 };
 
 export type TakedownTargetKey = string;
-export type ReportStatus = 'belum' | 'terkirim' | 'menunggu' | 'ditakedown';
 
 type Ctx = {
   triage: TriageAnswers;
@@ -23,9 +22,7 @@ type Ctx = {
   letters: Record<TakedownTargetKey, string>;
   setLetter: (target: TakedownTargetKey, text: string) => void;
 
-  reportStatus: Record<TakedownTargetKey, ReportStatus>;
-  setReportStatus: (target: TakedownTargetKey, status: ReportStatus) => void;
-
+  
   relationship: string;
   setRelationship: (v: string) => void;
 };
@@ -38,8 +35,6 @@ const SessionCtx = createContext<Ctx>({
   clearFields: () => {},
   letters: {},
   setLetter: () => {},
-  reportStatus: {},
-  setReportStatus: () => {},
   relationship: '',
   setRelationship: () => {},
 });
@@ -48,7 +43,6 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   const [triage, setTriageState] = useState<TriageAnswers>({});
   const [fieldValues, setFieldValues] = useState<Record<string, string>>({});
   const [letters, setLetters] = useState<Record<string, string>>({});
-  const [reportStatus, setReportStatusState] = useState<Record<string, ReportStatus>>({});
   const [relationship, setRelationship] = useState('');
 
   const setTriage = useCallback((patch: TriageAnswers) => {
@@ -65,9 +59,6 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     setLetters((prev) => ({ ...prev, [target]: text }));
   }, []);
 
-  const setReportStatus = useCallback((target: string, status: ReportStatus) => {
-    setReportStatusState((prev) => ({ ...prev, [target]: status }));
-  }, []);
 
   return (
     <SessionCtx.Provider
@@ -79,8 +70,6 @@ export function SessionProvider({ children }: { children: ReactNode }) {
         clearFields,
         letters,
         setLetter,
-        reportStatus,
-        setReportStatus,
         relationship,
         setRelationship,
       }}
