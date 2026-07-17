@@ -26,11 +26,17 @@ export function LetterView({
   values,
   onChange,
   needsIdentity = false,
+  mailto,
+  formUrl,
+  formLabel,
 }: {
   text: string;
   values: Record<string, string>;
   onChange: (key: string, value: string) => void;
   needsIdentity?: boolean;
+  mailto?: string;
+  formUrl?: string;
+  formLabel?: string;
 }) {
   const placeholders = useMemo(() => extractPlaceholders(text), [text]);
   const [copied, setCopied] = useState(false);
@@ -48,10 +54,36 @@ export function LetterView({
   const parts = useMemo(() => filled.split(PLACEHOLDER_SPLIT), [filled]);
   const remaining = placeholders.filter((p) => !values[p]?.trim()).length;
 
+  const subjectLine = useMemo(() => {
+    const first = filled.split('\n').find((l) => /^subject:/i.test(l.trim()));
+    return first ? first.replace(/^subject:\s*/i, '').trim() : 'Report: Non-consensual content';
+  }, [filled]);
+
+  const bodyText = useMemo(
+    () =>
+      filled
+        .split('\n')
+        .filter((l) => !/^subject:/i.test(l.trim()))
+        .join('\n')
+        .trim(),
+    [filled],
+  );
+
   async function copy() {
     await navigator.clipboard.writeText(filled);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  }
+
+  async function copyThenOpen() {
+    try {
+      await navigator.clipboard.writeText(filled);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Clipboard can fail; opening the form still helps.
+    }
+    window.open(formUrl, '_blank', 'noopener,noreferrer');
   }
 
   return (
@@ -123,16 +155,48 @@ export function LetterView({
         </pre>
       </div>
 
-      <button
-        onClick={copy}
-        className="w-full rounded-xl border border-[color:var(--line)] bg-[color:var(--surface-2)] px-4 py-3.5 text-[14px] text-[color:var(--warm)] transition-colors hover:border-[color:var(--mist)]"
-      >
-        {copied
-          ? 'Tersalin'
-          : remaining > 0
-            ? `Salin surat (${remaining} bagian masih kosong)`
-            : 'Salin surat'}
-      </button>
+      <div className="space-y-2.5">
+        <button
+          onClick={copy}
+          className="w-full rounded-xl border border-[color:var(--line)] bg-[color:var(--surface-2)] px-4 py-3.5 text-[14px] text-[color:var(--warm)] transition-colors hover:border-[color:var(--mist)]"
+        >
+          {copied
+            ? 'Tersalin'
+            : remaining > 0
+              ? `Salin surat (${remaining} bagian masih kosong)`
+              : 'Salin surat'}
+        </button>
+
+        {mailto && (
+          <>
+            <a
+              href={`mailto:${mailto}?subject=${encodeURIComponent(subjectLine)}&body=${encodeURIComponent(bodyText)}`}
+              className="flex w-full items-center justify-center rounded-xl border border-[color:var(--line)] px-4 py-3.5 text-[14px] text-[color:var(--warm)] transition-colors hover:border-[color:var(--mist)]"
+            >
+              Buka aplikasi email
+            </a>
+            <p className="text-[11px] leading-relaxed text-[color:var(--muted)]">
+              Ini membuka aplikasi email di device kamu dengan surat sudah terisi. Kamu yang menekan
+              kirim — periksa dulu isinya.
+            </p>
+          </>
+        )}
+
+        {formUrl && (
+          <>
+            <button
+              onClick={copyThenOpen}
+              className="flex w-full items-center justify-center rounded-xl border border-[color:var(--line)] px-4 py-3.5 text-[14px] text-[color:var(--warm)] transition-colors hover:border-[color:var(--mist)]"
+            >
+              Salin surat, lalu buka {formLabel ?? 'formulir'}
+            </button>
+            <p className="text-[11px] leading-relaxed text-[color:var(--muted)]">
+              Suratnya tersalin dan formulirnya terbuka di tab baru. Tempel ke kolom uraian aduan,
+              lalu kamu yang mengirim. Siapkan juga KTP kalau formulirnya memintanya.
+            </p>
+          </>
+        )}
+      </div>
     </div>
   );
 }

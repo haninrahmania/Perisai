@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import type { ReactNode } from 'react';
 
 export function Shell({
@@ -9,14 +10,23 @@ export function Shell({
   step,
 }: {
   children: ReactNode;
-  back?: { href: string; label: string };
+  back?: { href: string; label: string } | 'auto';
   step?: string;
 }) {
+  const router = useRouter();
+
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-[540px] flex-col px-5 pb-16 pt-6">
       {(back || step) && (
         <div className="mb-8 flex items-center justify-between text-sm">
-          {back ? (
+          {back === 'auto' ? (
+            <button
+              onClick={() => router.back()}
+              className="-ml-2 rounded px-2 py-2 text-[color:var(--muted)] transition-colors hover:text-[color:var(--warm)]"
+            >
+              ← Kembali
+            </button>
+          ) : back ? (
             <Link
               href={back.href}
               className="-ml-2 rounded px-2 py-2 text-[color:var(--muted)] transition-colors hover:text-[color:var(--warm)]"

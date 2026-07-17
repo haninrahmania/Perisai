@@ -16,6 +16,7 @@ export type EvidenceCardProps = {
     hashed_at: string;
     created_at: string;
   };
+  onDelete?: (id: string) => void;
 };
 
 const PLATFORM_LABEL: Record<string, string> = {
@@ -36,7 +37,7 @@ function formatMoment(iso: string) {
   });
 }
 
-export default function EvidenceCard({ evidence }: EvidenceCardProps) {
+export default function EvidenceCard({ evidence, onDelete }: EvidenceCardProps) {
   const [revealed, setRevealed] = useState(false);
   const [src, setSrc] = useState<string | null>(null);
   const [imgFailed, setImgFailed] = useState(false);
@@ -182,6 +183,17 @@ export default function EvidenceCard({ evidence }: EvidenceCardProps) {
             </dd>
           </div>
         </dl>
+
+        {onDelete && (
+          <div className="border-t border-[color:var(--line)] pt-3">
+            <button
+              onClick={() => onDelete(evidence.id)}
+              className="rounded-md px-2.5 py-2 text-[12px] text-[color:var(--muted)] transition-colors hover:text-[color:var(--fill)]"
+            >
+              Hapus bukti ini
+            </button>
+          </div>
+        )}
       </div>
     </article>
   );

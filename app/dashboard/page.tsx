@@ -4,18 +4,26 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { ensureSession } from '@/lib/supabase';
 import { listEvidence } from '@/lib/evidence';
+import { listReports } from '@/lib/reports';
 import { Shell, Title, Lede } from '@/components/ui';
 
 export default function DashboardPage() {
-  const [count, setCount] = useState<number | null>(null);
+  const [stats, setStats] = useState<{ bukti: number; laporan: number; terkirim: number } | null>(
+    null,
+  );
 
   useEffect(() => {
     (async () => {
       try {
         await ensureSession();
-        setCount((await listEvidence()).length);
+        const [evidence, reports] = await Promise.all([listEvidence(), listReports()]);
+        setStats({
+          bukti: evidence.length,
+          laporan: reports.length,
+          terkirim: reports.filter((r) => r.status !== 'draft').length,
+        });
       } catch {
-        setCount(0);
+        setStats({ bukti: 0, laporan: 0, terkirim: 0 });
       }
     })();
   }, []);
@@ -27,13 +35,10 @@ export default function DashboardPage() {
         Tidak ada target, tidak ada tenggat. Ini cuma catatan tentang apa yang sudah kamu amankan.
       </Lede>
 
-      <div className="mt-8 rounded-2xl border border-[color:var(--line)] bg-[color:var(--surface)] p-6">
-        <p className="font-display text-[40px] font-semibold leading-none text-[color:var(--warm)]">
-          {count ?? '—'}
-        </p>
-        <p className="mt-2 text-[14px] text-[color:var(--muted)]">
-          bukti tersimpan di brankas kamu
-        </p>
+      <div className="mt-8 grid grid-cols-3 gap-3">
+        <Stat value={stats?.bukti ?? '—'} label="bukti aman" />
+        <Stat value={stats?.laporan ?? '—'} label="naskah siap" />
+        <Stat value={stats?.terkirim ?? '—'} label="sudah kamu kirim" />
       </div>
 
       <nav className="mt-6 space-y-3">
@@ -48,6 +53,7 @@ export default function DashboardPage() {
           title="Sertifikat bukti"
           note="PDF berisi daftar bukti dan sidik digitalnya"
         />
+        <Row href="/pengaturan" title="Data kamu" note="Hapus bukti atau seluruh data" />
       </nav>
 
       <div className="mt-10 rounded-2xl border border-[color:var(--line)] p-5">
@@ -56,6 +62,7 @@ export default function DashboardPage() {
           LBH APIK, Komnas Perempuan, dan SAFEnet mendampingi kasus seperti ini tanpa biaya. Mereka
           sudah terbiasa — kamu tidak perlu menjelaskan dari nol.
         </p>
+        
         <a
           href="https://lbhapik.or.id"
           className="mt-3 inline-block text-[13px] text-[color:var(--mist)]"
@@ -64,6 +71,17 @@ export default function DashboardPage() {
         </a>
       </div>
     </Shell>
+  );
+}
+
+function Stat({ value, label }: { value: number | string; label: string }) {
+  return (
+    <div className="rounded-2xl border border-[color:var(--line)] bg-[color:var(--surface)] p-4">
+      <p className="font-display text-[28px] font-semibold leading-none text-[color:var(--warm)]">
+        {value}
+      </p>
+      <p className="mt-2 text-[12px] leading-snug text-[color:var(--muted)]">{label}</p>
+    </div>
   );
 }
 

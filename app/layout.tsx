@@ -18,7 +18,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="id" className={`${body.variable} ${mono.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col bg-[#0F1D2B] text-[#E8E4DC]">
+      <body
+        className="min-h-full flex flex-col bg-[#0F1D2B] text-[#E8E4DC]"
+        suppressHydrationWarning
+      >
         <SessionProvider>{children}</SessionProvider>
       </body>
     </html>

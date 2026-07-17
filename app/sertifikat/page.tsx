@@ -67,7 +67,7 @@ export default function SertifikatPage() {
           <p className="mt-2 text-[13px] leading-relaxed text-[color:var(--muted)]">
             Sidik digital setiap bukti dihitung{' '}
             <span className="text-[color:var(--warm)]">
-              di HP kamu, sebelum apa pun sampai ke server kami
+              di device kamu, sebelum apa pun sampai ke server kami
             </span>
             . Kalau nanti ada yang mempertanyakan apakah bukti kamu berubah sejak disimpan, angka
             inilah jawabannya. Ini memperkuat integritas bukti.

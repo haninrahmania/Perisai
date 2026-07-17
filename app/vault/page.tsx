@@ -3,8 +3,11 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { ensureSession } from '@/lib/supabase';
-import { addEvidence, listEvidence } from '@/lib/evidence';
+import { addEvidence, listEvidence, deleteEvidence } from '@/lib/evidence';
+import { listReports } from '@/lib/reports';
 import EvidenceCard from '@/components/EvidenceCard';
+import { ConfirmDialog } from '@/components/ConfirmDialog';
+import { Toast } from '@/components/Toast';
 import { Shell, Title, Lede, Button, Notice } from '@/components/ui';
 import { useSession } from '@/components/SessionProvider';
 
@@ -25,6 +28,7 @@ export default function VaultPage() {
   const [adding, setAdding] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [justSecured, setJustSecured] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
 
   const [mode, setMode] = useState<'url' | 'screenshot'>('url');
   const [sourceUrl, setSourceUrl] = useState('');
@@ -32,6 +36,10 @@ export default function VaultPage() {
   const [platform, setPlatform] = useState<string>(triage.platform ?? '');
   const [description, setDescription] = useState('');
   const [foundAt, setFoundAt] = useState('');
+
+  const [pendingDelete, setPendingDelete] = useState<string | null>(null);
+  const [affectedCount, setAffectedCount] = useState(0);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -50,6 +58,7 @@ export default function VaultPage() {
     setError(null);
     setAdding(true);
     const wasEmpty = rows.length === 0;
+    const count = mode === 'screenshot' ? files.length : 1;
     try {
       if (mode === 'url') {
         await addEvidence({
@@ -74,11 +83,42 @@ export default function VaultPage() {
       setSourceUrl('');
       setFiles([]);
       setDescription('');
-      if (wasEmpty) setJustSecured(true);
+      if (wasEmpty) {
+        setJustSecured(true);
+      } else {
+        setToast(count > 1 ? `${count} bukti diamankan` : 'Bukti diamankan');
+      }
     } catch {
       setError('Bukti kamu belum tersimpan. Tidak ada yang hilang — coba tekan simpan lagi.');
     } finally {
       setAdding(false);
+    }
+  }
+
+  async function askDelete(id: string) {
+    setPendingDelete(id);
+    setAffectedCount(0);
+    try {
+      const reports = await listReports();
+      setAffectedCount(reports.filter((r) => r.evidence_ids.includes(id)).length);
+    } catch {
+      // Counting is a courtesy. If it fails, still let her delete.
+    }
+  }
+
+  async function confirmDelete() {
+    if (!pendingDelete) return;
+    setDeleting(true);
+    try {
+      await deleteEvidence(pendingDelete);
+      setRows(await listEvidence());
+      setPendingDelete(null);
+      setToast('Bukti dihapus');
+    } catch {
+      setError('Bukti itu belum bisa dihapus. Coba lagi sebentar lagi.');
+      setPendingDelete(null);
+    } finally {
+      setDeleting(false);
     }
   }
 
@@ -91,7 +131,7 @@ export default function VaultPage() {
           <div className="mb-8 h-px w-12 bg-[color:var(--mist)]" />
           <Title>Bukti kamu aman.</Title>
           <Lede>
-            Kamu tidak perlu membukanya lagi. Sidik digitalnya sudah dihitung di HP kamu, sebelum
+            Kamu tidak perlu membukanya lagi. Sidik digitalnya sudah dihitung di device kamu, sebelum
             apa pun sampai ke server kami.
           </Lede>
           <div className="mt-10 space-y-3">
@@ -106,7 +146,7 @@ export default function VaultPage() {
   }
 
   return (
-    <Shell back={{ href: '/dashboard', label: 'Beranda' }} step="Brankas bukti">
+    <Shell back="auto" step="Brankas bukti">
       <Title>Brankas bukti</Title>
       <Lede>
         Simpan jejaknya sekarang, selagi masih ada. Konten seperti ini sering dihapus atau
@@ -236,15 +276,15 @@ export default function VaultPage() {
 
       <div className="mt-6">
         <Notice>
-          Sidik digital dihitung di HP kamu sebelum apa pun terkirim. Ini memperkuat integritas
-          bukti — bukan pemeriksaan forensik resmi.
+          Sidik digital dihitung di device kamu sebelum apa pun terkirim. Ini memperkuat integritas
+          bukti, bukan pemeriksaan forensik resmi.
         </Notice>
       </div>
 
-      <section className="mt-10">
-        {loading ? (
-          <p className="text-[14px] text-[color:var(--muted)]">Membuka brankas…</p>
-        ) : rows.length === 0 ? (
+      {loading && <p className="mt-14 text-[14px] text-[color:var(--muted)]">Membuka brankas…</p>}
+
+      {!loading && rows.length === 0 && (
+        <div className="mt-14 border-t border-[color:var(--line)] pt-10">
           <div className="rounded-2xl border border-[color:var(--line)] px-6 py-12 text-center">
             <p className="font-display text-[19px] leading-snug text-[color:var(--warm)]">
               Brankas kamu masih kosong.
@@ -254,24 +294,64 @@ export default function VaultPage() {
               kapan pun.
             </p>
           </div>
-        ) : (
-          <>
-            <div className="mb-4 flex items-baseline justify-between">
-              <h2 className="font-mono text-xs uppercase tracking-widest text-[color:var(--muted)]">
-                {rows.length} bukti tersimpan
+        </div>
+      )}
+
+      {!loading && rows.length > 0 && (
+        <div className="mt-14 border-t border-[color:var(--line)] pt-10">
+          <div className="flex items-end justify-between gap-4">
+            <div>
+              <h2 className="font-display text-[22px] leading-tight text-[color:var(--warm)]">
+                Brankas kamu
               </h2>
-              <Link href="/sertifikat" className="text-[13px] text-[color:var(--mist)]">
-                Buat sertifikat →
-              </Link>
+              <p className="mt-1.5 text-[13px] text-[color:var(--muted)]">
+                {rows.length} bukti tersimpan, semuanya tertutup
+              </p>
             </div>
-            <div className="space-y-4">
-              {rows.map((row) => (
-                <EvidenceCard key={row.id} evidence={row} />
-              ))}
-            </div>
-          </>
+            <Link
+              href="/sertifikat"
+              className="shrink-0 pb-1 text-[13px] text-[color:var(--mist)] transition-colors hover:text-[color:var(--warm)]"
+            >
+              Buat sertifikat →
+            </Link>
+          </div>
+
+          <div className="mt-6 space-y-4">
+            {rows.map((row) => (
+              <EvidenceCard key={row.id} evidence={row} onDelete={askDelete} />
+            ))}
+          </div>
+        </div>
+      )}
+      
+      {!loading && rows.length > 0 && (
+        <div className="mt-10 space-y-3">
+          <Button href="/takedown">Susun laporan dari bukti ini</Button>
+          <Button href="/sertifikat" variant="quiet">
+            Buat sertifikat bukti
+          </Button>
+        </div>
+      )}
+
+      <ConfirmDialog
+        open={pendingDelete !== null}
+        title="Hapus bukti ini?"
+        confirmLabel="Ya, hapus"
+        busy={deleting}
+        onConfirm={confirmDelete}
+        onCancel={() => setPendingDelete(null)}
+      >
+        <p>Tindakan ini tidak bisa dibatalkan.</p>
+        {affectedCount > 0 && (
+          <p>
+            Bukti ini dipakai di {affectedCount} laporan. Kalau dihapus, laporan itu perlu dibuat
+            ulang.
+          </p>
         )}
-      </section>
+        <p>Sertifikat yang sudah kamu unduh tidak ikut terhapus — file itu sudah jadi milik kamu.</p>
+      </ConfirmDialog>
+
+      <Toast message={toast} onDone={() => setToast(null)} />
     </Shell>
   );
 }

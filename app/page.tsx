@@ -32,7 +32,7 @@ export default function Home() {
           kamu tidak salah.
         </h1>
         <p className="mt-4 max-w-[360px] text-[15px] leading-relaxed text-[color:var(--muted)]">
-          Perisai menemani kamu mengamankan bukti, menyusun laporan, dan menemukan pendamping —
+          Perisai menemani kamu mengamankan bukti, menyusun laporan, dan menemukan pendamping dalam
           satu langkah kecil setiap kali.
         </p>
 
@@ -49,17 +49,7 @@ export default function Home() {
             </span>
           </Link>
 
-          <Link
-            href="/lindungi"
-            className="block rounded-2xl border border-[color:var(--line)] px-6 py-7 text-[color:var(--warm)] transition-colors hover:bg-[color:var(--surface)]"
-          >
-            <span className="block text-[18px] font-semibold leading-snug">
-              Aku mau melindungi diri
-            </span>
-            <span className="mt-1.5 block text-[13px] text-[color:var(--muted)]">
-              Belum terjadi apa-apa, tapi aku ingin siap
-            </span>
-          </Link>
+
         </div>
       </div>
 
