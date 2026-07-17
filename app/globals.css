@@ -31,6 +31,22 @@ body {
   font-family: var(--font-mono), ui-monospace, monospace;
 }
 
+.skeleton-block {
+  background: linear-gradient(
+    105deg,
+    rgba(120, 91, 192, 0.08) 20%,
+    rgba(120, 91, 192, 0.16) 38%,
+    rgba(120, 91, 192, 0.08) 56%
+  );
+  background-size: 220% 100%;
+  animation: skeleton-breathe 1.8s ease-in-out infinite;
+}
+
+@keyframes skeleton-breathe {
+  0%, 100% { background-position: 100% 0; }
+  50% { background-position: 0 0; }
+}
+
 .shield-veil {
   filter: blur(22px) saturate(0.55) brightness(0.75);
   transform: scale(1.12);
@@ -53,6 +69,11 @@ body {
   *::after {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
+  }
+
+  .skeleton-block {
+    animation: none;
+    background: rgba(120, 91, 192, 0.1);
   }
 }
 

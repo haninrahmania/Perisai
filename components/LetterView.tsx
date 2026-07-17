@@ -97,8 +97,8 @@ export function LetterView({
             {needsIdentity
               ? 'Komdigi dan kepolisian mewajibkan identitas pelapor — laporan tanpa itu tidak bisa diproses. '
               : ''}
-            Yang kamu ketik di sini masuk ke salinan suratmu saja: tidak dikirim ke server Perisai,
-            tidak disimpan, dan hilang begitu kamu berpindah halaman.
+            Yang kamu ketik hanya masuk ke salinan yang sedang terbuka. Perisai tidak menyimpannya,
+            dan isian akan kosong saat kamu meninggalkan halaman ini.
           </p>
 
           <div className="mt-4 space-y-3">
@@ -130,9 +130,8 @@ export function LetterView({
 
           {hasNik && (
             <p className="mt-4 border-t border-[rgba(255,141,92,0.25)] pt-3 text-[12px] leading-relaxed text-[color:var(--muted)]">
-              Kamu yang memutuskan kapan dan kepada siapa nama kamu diberikan. Perisai tidak pernah
-              tahu — dan tidak bisa memberitahukannya ke siapa pun, karena memang tidak
-              menyimpannya.
+              Kamu memilih kapan dan kepada siapa identitas diberikan. Perisai tidak menyimpan
+              isian ini, sehingga tidak dapat memberikannya kepada siapa pun.
             </p>
           )}
         </div>
@@ -176,8 +175,8 @@ export function LetterView({
               Buka aplikasi email
             </a>
             <p className="text-[11px] leading-relaxed text-[color:var(--muted)]">
-              Ini membuka aplikasi email di device kamu dengan surat sudah terisi. Kamu yang menekan
-              kirim — periksa dulu isinya.
+              Aplikasi email akan terbuka dengan laporan yang sudah terisi. Periksa isinya sebelum
+              kamu mengirimnya.
             </p>
           </>
         )}
@@ -188,11 +187,11 @@ export function LetterView({
               onClick={copyThenOpen}
               className="flex w-full items-center justify-center rounded-xl border border-[color:var(--line)] px-4 py-3.5 text-[14px] text-[color:var(--warm)] transition-colors hover:border-[color:var(--mist)]"
             >
-              Salin surat, lalu buka {formLabel ?? 'formulir'}
+              Salin surat, lalu buka {formLabel ?? 'tujuan resmi'}
             </button>
             <p className="text-[11px] leading-relaxed text-[color:var(--muted)]">
-              Suratnya tersalin dan formulirnya terbuka di tab baru. Tempel ke kolom uraian aduan,
-              lalu kamu yang mengirim. Siapkan juga KTP kalau formulirnya memintanya.
+              Situs resmi akan terbuka di tab baru. Laporan disalin jika browser mengizinkan.
+              Periksa setiap bagian sebelum kamu mengirimnya.
             </p>
           </>
         )}

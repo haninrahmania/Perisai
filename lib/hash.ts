@@ -6,7 +6,7 @@ export async function sha256(data: BufferSource): Promise<string> {
     .join('');
 }
 
-export async function hashFile(file: File): Promise<string> {
+export async function hashFile(file: Blob): Promise<string> {
   return sha256(await file.arrayBuffer());
 }
 

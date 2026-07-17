@@ -1,65 +1,135 @@
-import { GoogleGenAI } from '@google/genai';
-import { NAVIGATOR_SYSTEM } from '@/lib/navigator-prompt';
-import { detectCrisis, EMERGENCY } from '@/lib/crisis';
-import { matchFallback } from '@/lib/navigator-fallbacks';
+import { createGoogleGenerativeAI } from '@ai-sdk/google';
+import {
+  convertToModelMessages,
+  streamText,
+  validateUIMessages,
+  type UIMessage,
+} from 'ai';
+import {
+  reviewAssistantDisclosure,
+  type AssistantReportContext,
+} from '@/lib/assistant-boundary';
+import {
+  REPORT_STATUSES,
+  REPORT_TARGETS,
+  type ReportStatus,
+  type TakedownTarget,
+} from '@/lib/reporting';
 
 export const runtime = 'nodejs';
 export const maxDuration = 60;
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! });
-const MODELS = (process.env.GEMINI_MODEL ?? 'gemini-3.5-flash,gemini-3.1-flash-lite')
-  .split(',').map((m) => m.trim());
+const MAX_MESSAGES = 20;
+const MAX_TRANSCRIPT_CHARACTERS = 20_000;
 
-type Msg = { role: 'user' | 'model'; text: string };
+const SYSTEM_PROMPT = `Kamu adalah Pendamping Perisai, pendamping informasi berbahasa Indonesia
+untuk orang yang sudah membuat laporan atas penyebaran atau ancaman penyebaran konten intim tanpa
+persetujuan. Jawab dengan tenang, singkat, praktis, dan tanpa menghakimi.
 
-export async function POST(req: Request) {
-  const { messages, evidenceCount = 0 } = await req.json();
-  const last = messages[messages.length - 1];
+Batas wajib:
+- Jangan meminta nama, NIK, alamat, nomor telepon, isi konten eksplisit, URL, atau unggahan bukti.
+- Jangan mengaku melihat brankas, bukti, naskah, status platform, atau hasil penegakan.
+- Jangan menjanjikan penghapusan, hasil hukum, atau waktu penyelesaian.
+- Gunakan teks biasa tanpa Markdown dan jangan mengarang tautan, nomor kontak, atau kebijakan.
+- Bedakan informasi umum dari nasihat hukum dan arahkan ke bantuan manusia bila perlu.
+- Jika konteks laporan diberikan, gunakan hanya target dan status itu.
+- Jangan menyuruh pengguna mengulang detail sensitif yang tidak diperlukan.`;
 
-  const crisis = detectCrisis(last?.text ?? '');
-
-  // TEMP — remove before ship
-  const _debug = { lastText: last?.text ?? null, crisis };
-
-  if (crisis) {
-    return Response.json({ kind: 'crisis', crisis, contacts: EMERGENCY[crisis], text: '…', _debug });
+export async function POST(request: Request) {
+  if (!process.env.GEMINI_API_KEY) {
+    return Response.json({ error: 'Pendamping belum tersedia. Coba lagi nanti.' }, { status: 503 });
   }
-
-  const ctxLine =
-    evidenceCount > 0
-      ? `\n\nKONTEKS: Korban sudah mengamankan ${evidenceCount} bukti di Perisai (hash + timestamp) dan sudah punya kronologi yang bisa dibuka kapan saja. JANGAN tanya apakah dia sudah menyimpan bukti — dia sudah. Kalau relevan, rujuk ke bukti yang sudah ada.`
-      : '';
 
   try {
-    let res, lastErr;
-    for (const model of MODELS) {
-      try {
-        res = await ai.models.generateContent({
-          model,
-          contents: messages.map((m: Msg) => ({ role: m.role, parts: [{ text: m.text }] })),
-          config: {
-            systemInstruction: NAVIGATOR_SYSTEM + ctxLine,   // ← here
-            maxOutputTokens: 4000,
-            temperature: 0.6,
-          },
-        });
-        break;
-      } catch (err: any) {
-        lastErr = err;
-        console.warn(`${model} failed: ${err.message?.slice(0, 80)}`);
-      }
+    const body: unknown = await request.json();
+    if (!isRecord(body) || body.consent !== true || !Array.isArray(body.messages)) {
+      return Response.json({ error: 'Pesan belum bisa dibaca.' }, { status: 400 });
     }
-    if (!res) throw lastErr;
+    if (body.messages.length === 0 || body.messages.length > MAX_MESSAGES) {
+      return Response.json({ error: 'Percakapan terlalu panjang. Mulai percakapan baru.' }, { status: 400 });
+    }
 
-    const text = (res.text ?? '').trim();
-    if (!text) throw new Error('empty response');
-    return Response.json({ kind: 'reply', text, source: 'live' });
-  } catch (e: any) {
-    console.error('navigator error:', e.message);
-    return Response.json({
-        kind: 'reply',
-        text: matchFallback(last?.text ?? ''),
-        source: 'cached',
+    const messages = await validateUIMessages({ messages: body.messages });
+    const reportContext = parseReportContext(body.reportContext);
+    const lastMessage = messages.at(-1);
+    const transcriptCharacters = textCharacterCount(messages);
+
+    if (
+      !lastMessage ||
+      lastMessage.role !== 'user' ||
+      transcriptCharacters > MAX_TRANSCRIPT_CHARACTERS ||
+      messages.some((message) =>
+        message.role === 'system' || message.parts.some((part) => part.type !== 'text'),
+      )
+    ) {
+      return Response.json({ error: 'Pendamping hanya menerima pesan teks.' }, { status: 400 });
+    }
+
+    const lastText = lastMessage.parts.map((part) => part.type === 'text' ? part.text : '').join('\n');
+    const disclosure = reviewAssistantDisclosure({
+      message: lastText,
+      consent: true,
+      reportContext,
     });
+    if (disclosure.kind === 'crisis') {
+      return Response.json(
+        { error: 'Pesan tidak dikirim. Gunakan bantuan darurat yang ditampilkan.', crisis: disclosure.crisis },
+        { status: 422 },
+      );
+    }
+
+    const google = createGoogleGenerativeAI({ apiKey: process.env.GEMINI_API_KEY });
+    const contextLine = reportContext
+      ? `\nKonteks yang dipilih pengguna: target ${reportContext.target}, status ${reportContext.status}.`
+      : '\nPengguna tidak memilih konteks laporan apa pun.';
+    const result = streamText({
+      model: google(process.env.GEMINI_MODEL ?? 'gemini-2.5-flash'),
+      system: SYSTEM_PROMPT + contextLine,
+      messages: await convertToModelMessages(messages),
+      maxOutputTokens: 1_000,
+      temperature: 0.4,
+    });
+
+    return result.toUIMessageStreamResponse({
+      onError: () => 'Pendamping sedang tidak tersedia. Coba lagi nanti.',
+    });
+  } catch {
+    return Response.json({ error: 'Pesan belum bisa diproses. Periksa isinya dan coba lagi.' }, { status: 400 });
   }
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function isTakedownTarget(value: unknown): value is TakedownTarget {
+  return typeof value === 'string' && REPORT_TARGETS.some((target) => target === value);
+}
+
+function isSubmittedStatus(value: unknown): value is Exclude<ReportStatus, 'draft'> {
+  return (
+    typeof value === 'string' &&
+    value !== 'draft' &&
+    REPORT_STATUSES.some((status) => status === value)
+  );
+}
+
+function parseReportContext(value: unknown): AssistantReportContext | null {
+  if (value === null || value === undefined) return null;
+  if (!isRecord(value) || !isTakedownTarget(value.target) || !isSubmittedStatus(value.status)) {
+    throw new Error('Invalid report context.');
+  }
+  return { target: value.target, status: value.status };
+}
+
+function textCharacterCount(messages: UIMessage[]): number {
+  return messages.reduce(
+    (total, message) =>
+      total +
+      message.parts.reduce(
+        (messageTotal, part) => messageTotal + (part.type === 'text' ? part.text.length : 0),
+        0,
+      ),
+    0,
+  );
 }
