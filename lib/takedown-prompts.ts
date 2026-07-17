@@ -21,7 +21,8 @@ manipulasi (deepfake), konten tersebut adalah fabrikasi yang menggunakan wajah p
 nyatakan secara eksplisit bahwa konten dibuat menggunakan manipulasi digital tanpa
 persetujuan, bukan rekaman asli pelapor.
 - Gunakan deskripsi bukti PERSIS seperti yang diberikan. JANGAN mengarang atau menebak isi
-sebuah bukti. Jika deskripsi tidak tersedia, tulis "tangkapan layar (deskripsi belum diisi)".
+sebuah bukti. Jika suatu bukti tidak punya deskripsi, JANGAN tulis placeholder apa pun untuk
+itu — langsung hilangkan bagian deskripsi untuk bukti tersebut.
 - Keluarkan HANYA isi dokumen. Tanpa preamble, tanpa penjelasan, tanpa markdown fence.`;
 
 const TARGET_INSTRUCTIONS: Record<TakedownTarget, string> = {
@@ -57,7 +58,7 @@ export function buildPrompt(target: TakedownTarget, ctx: {
   const evidenceList = ctx.evidence
     .map((e, i) =>
       `${i + 1}. [${e.kind}] ${e.source_url ?? '(tangkapan layar)'}` +
-      ` — deskripsi: ${e.description ?? '(tidak ada deskripsi)'}` +
+      (e.description ? ` — deskripsi: ${e.description}` : '') +
       ` — SHA-256: ${e.sha256} — diamankan: ${e.hashed_at}`)
     .join('\n');
 
