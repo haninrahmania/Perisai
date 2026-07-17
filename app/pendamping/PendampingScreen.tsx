@@ -11,6 +11,7 @@ import {
 } from '@/lib/assistant-boundary';
 import { REPORT_STATUS_LABEL, REPORT_TARGET_METADATA } from '@/lib/reporting';
 import { useActiveCase } from '@/components/useActiveCase';
+import { EmergencyContacts } from '@/components/EmergencyContacts';
 import {
   Message,
   MessageContent,
@@ -223,13 +224,9 @@ function CrisisCard({
     <div className="rounded-2xl border border-[color:var(--fill)] bg-[rgba(255,141,92,0.08)] p-5">
       <p className="text-[15px] font-medium text-[color:var(--heading)]">Keselamatanmu lebih penting.</p>
       <p className="mt-2 text-[13px] text-[color:var(--muted)]">Pesan ini tidak dikirim ke Gemini. Hubungi bantuan manusia sekarang:</p>
-      {result.contacts.map((contact) => (
-        <div key={contact.contact} className="mt-3 rounded-xl border border-[color:var(--line)] bg-[color:var(--surface)] p-4">
-          <p className="text-[13px] font-medium text-[color:var(--warm)]">{contact.name}</p>
-          <p className="mt-1 font-mono text-[12px] text-[color:var(--mist)]">{contact.contact}</p>
-          <p className="mt-1 text-[12px] text-[color:var(--muted)]">{contact.note}</p>
+        <div className="mt-3">
+          <EmergencyContacts contacts={result.contacts} />
         </div>
-      ))}
     </div>
   );
 }

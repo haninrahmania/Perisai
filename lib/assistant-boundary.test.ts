@@ -11,6 +11,28 @@ describe('reviewAssistantDisclosure', () => {
     expect(result).toMatchObject({ kind: 'crisis', crisis: 'self_harm' });
   });
 
+  it('returns the complete physical-help directory without using the network', () => {
+    const fetchSpy = vi.spyOn(globalThis, 'fetch');
+    const result = reviewAssistantDisclosure({
+      message: 'dia datang ke rumah dan mengancam aku',
+      consent: false,
+      reportContext: null,
+    });
+
+    expect(result).toMatchObject({ kind: 'crisis', crisis: 'physical_danger' });
+    if (result.kind === 'crisis') {
+      expect(result.contacts.map((contact) => contact.name)).toEqual([
+        'Polisi 110',
+        'SAPA 129 Kementerian PPPA',
+        'Komnas Perempuan',
+        'LBH APIK Jakarta',
+      ]);
+      expect(result.contacts.every((contact) => Boolean(contact.href))).toBe(true);
+    }
+    expect(fetchSpy).not.toHaveBeenCalled();
+    fetchSpy.mockRestore();
+  });
+
   it('requires consent and bounded non-empty text', () => {
     expect(() => reviewAssistantDisclosure({ message: 'halo', consent: false, reportContext: null })).toThrow('Centang persetujuan');
     expect(() => reviewAssistantDisclosure({ message: ' ', consent: true, reportContext: null })).toThrow('1–1000');

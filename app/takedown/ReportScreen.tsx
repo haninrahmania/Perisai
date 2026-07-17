@@ -139,27 +139,85 @@ export default function ReportScreen() {
   if (loading || !caseRecord) return <PageSkeleton cards={4} />;
   if (evidence.length === 0) return <Shell back={{ href: '/dashboard/', label: 'Kasus' }}><Title>Belum ada bukti</Title><Lede>Tambahkan satu URL atau file sebelum menyusun laporan.</Lede><div className="mt-8"><Button href="/vault/">Ke brankas</Button></div></Shell>;
 
-  const destination = target ? REPORT_TARGET_METADATA[target].destination : null;
+  const targetMetadata = target ? REPORT_TARGET_METADATA[target] : null;
+  const destination = targetMetadata?.destination ?? null;
   const submittedReports = Object.values(reports).filter((report): report is ReportRecord => Boolean(report));
 
   return (
     <Shell back={{ href: '/dashboard/', label: 'Kasus' }} step="Laporan">
       <Title>Susun laporan</Title>
-      <Lede>Pilih satu target, lalu pilih bukti yang memang ingin kamu sertakan. Tidak ada pilihan seluruh brankas.</Lede>
+      <Lede>
+        Perisai menyiapkan naskah dari bukti yang kamu pilih. Kamu yang membaca dan mengirimnya—
+        tidak ada isi brankas yang dipilih atau dikirim secara otomatis.
+      </Lede>
 
-      <div className="mt-6 flex flex-wrap gap-2">
+      <section className="mt-8">
+        <h2 className="text-[15px] font-medium text-[color:var(--warm)]">Pilih tujuan laporan</h2>
+        <p className="mt-2 text-[13px] leading-relaxed text-[color:var(--muted)]">
+          Setiap tujuan memiliki naskah, persyaratan, dan bukti yang berbeda. Kamu bisa kembali dan
+          menyiapkan tujuan lain setelah satu laporan selesai.
+        </p>
+      </section>
+
+      <div className="mt-4 space-y-3">
         {targets.map((item) => (
-          <button key={item} type="button" onClick={() => { setTarget(item); setFieldValues({}); }} className={`rounded-xl border px-3 py-2.5 text-[12px] ${target === item ? 'border-[color:var(--mist)] bg-[color:var(--surface-2)] text-[color:var(--warm)]' : 'border-[color:var(--line)] text-[color:var(--muted)]'}`}>
-            {REPORT_TARGET_METADATA[item].label}
+          <button
+            key={item}
+            type="button"
+            onClick={() => { setTarget(item); setFieldValues({}); }}
+            className={`w-full rounded-2xl border p-5 text-left transition-colors ${target === item ? 'border-[color:var(--mist)] bg-[color:var(--surface-2)]' : 'border-[color:var(--line)] bg-[color:var(--surface)]'}`}
+            aria-pressed={target === item}
+          >
+            <span className="flex items-start justify-between gap-4">
+              <span className="text-[16px] font-medium text-[color:var(--warm)]">
+                {REPORT_TARGET_METADATA[item].label}
+              </span>
+              <span className={`rounded-md border px-2 py-1 text-[10px] ${REPORT_TARGET_METADATA[item].requiresIdentity ? 'border-[color:var(--fill)] text-[color:var(--fill)]' : 'border-[color:var(--line)] text-[color:var(--muted)]'}`}>
+                {REPORT_TARGET_METADATA[item].requiresIdentity ? 'Perlu identitas' : 'Tanpa NIK'}
+              </span>
+            </span>
+            <span className="mt-2 block text-[13px] leading-relaxed text-[color:var(--muted)]">
+              {REPORT_TARGET_METADATA[item].handoff}
+            </span>
+            {reports[item] && (
+              <span className="mt-3 block text-[11px] text-[color:var(--mist)]">
+                {REPORT_STATUS_LABEL[reports[item]!.status]}
+              </span>
+            )}
           </button>
         ))}
       </div>
 
-      {target && (
+      {target && targetMetadata && (
         <>
+          {targetMetadata.requiresIdentity && (
+            <div className="mt-6 rounded-2xl border border-[color:var(--fill)] bg-[rgba(255,141,92,0.08)] p-5">
+              <p className="text-[14px] font-medium text-[color:var(--warm)]">
+                Mengapa tujuan ini meminta identitas
+              </p>
+              <p className="mt-2 text-[13px] leading-relaxed text-[color:var(--muted)]">
+                Komdigi dan kepolisian memerlukan identitas pelapor untuk memproses laporan. Itu
+                persyaratan mereka, bukan Perisai. Nama, NIK, alamat, dan kontak baru kamu isi pada
+                salinan laporan dan tidak disimpan saat halaman ini ditutup.
+              </p>
+              {targets.some((item) => !REPORT_TARGET_METADATA[item].requiresIdentity) && (
+                <p className="mt-3 text-[13px] leading-relaxed text-[color:var(--muted)]">
+                  Kalau belum siap memberikan identitas resmi, kamu bisa mulai dengan laporan ke
+                  platform yang ditandai “Tanpa NIK”.
+                </p>
+              )}
+            </div>
+          )}
+
           <section className="mt-6 rounded-2xl border border-[color:var(--line)] bg-[color:var(--surface)] p-5">
-            <h2 className="text-[15px] font-medium text-[color:var(--warm)]">Bukti untuk {REPORT_TARGET_METADATA[target].label}</h2>
-            <p className="mt-2 text-[12px] text-[color:var(--muted)]">Untuk laporan ke platform, hanya bukti dari platform yang sama yang dapat dipilih. Laporan ke Komdigi dan kronologi dapat memakai bukti lain dari kasus ini.</p>
+            <h2 className="text-[15px] font-medium text-[color:var(--warm)]">Pilih bukti untuk {targetMetadata.label}</h2>
+            <p className="mt-2 text-[12px] leading-relaxed text-[color:var(--muted)]">
+              {targetMetadata.language === 'en'
+                ? `Naskah dibuat dalam bahasa Inggris agar sesuai dengan kanal ${targetMetadata.label}. `
+                : 'Naskah dibuat dalam bahasa Indonesia. '}
+              Untuk platform, hanya bukti dari platform yang sama yang dapat dipilih. Komdigi dan
+              kronologi kepolisian dapat memakai bukti lain dari kasus ini.
+            </p>
             <div className="mt-4 space-y-2">
               {eligible.map((record) => (
                 <label key={record.id} className="flex gap-3 rounded-xl border border-[color:var(--line)] p-3 text-[12px] text-[color:var(--warm)]">
@@ -186,7 +244,7 @@ export default function ReportScreen() {
                 text={currentReport.content}
                 values={fieldValues}
                 onChange={(key, value) => setFieldValues((current) => ({ ...current, [key]: value }))}
-                needsIdentity
+                needsIdentity={targetMetadata.requiresIdentity}
                 mailto={destination?.kind === 'mailto' ? destination.href.replace(/^mailto:/, '') : undefined}
                 formUrl={destination?.kind === 'url' ? destination.href : undefined}
                 formLabel={destination?.label}

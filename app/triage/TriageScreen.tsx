@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 import { caseStore, type IncidentKind, type Platform } from '@/lib/case-store';
+import { EMERGENCY } from '@/lib/crisis';
+import { EmergencyContacts } from '@/components/EmergencyContacts';
 import { useActiveCase } from '@/components/useActiveCase';
 import { Shell, Title, Lede, Choice, Button, Notice, PageSkeleton } from '@/components/ui';
 
@@ -24,20 +26,44 @@ function EmergencyScreen({ onSafe }: { onSafe: () => void }) {
   return (
     <Shell>
       <div className="py-8">
+        <div className="mb-8 h-px w-12 bg-[color:var(--mist)]" />
         <Title>Keselamatan kamu dulu.</Title>
-        <Lede>Kalau ada bahaya langsung, hubungi bantuan manusia sekarang. Kasusmu tetap tersimpan.</Lede>
-        <div className="mt-8 space-y-3">
-          <a href="tel:110" className="block rounded-2xl border border-[color:var(--line)] p-5">
-            <p className="text-[16px] text-[color:var(--warm)]">Polisi / darurat</p>
-            <p className="mt-1 font-mono text-[color:var(--mist)]">110</p>
-          </a>
-          <a href="tel:129" className="block rounded-2xl border border-[color:var(--line)] p-5">
-            <p className="text-[16px] text-[color:var(--warm)]">SAPA Kementerian PPPA</p>
-            <p className="mt-1 font-mono text-[color:var(--mist)]">129</p>
-          </a>
+        <Lede>
+          Bukti dan laporan bisa menunggu—semuanya masih akan ada di sini nanti. Sekarang, kalau
+          bisa, pergi ke tempat yang lebih aman, hubungi orang yang kamu percaya, atau pilih salah
+          satu bantuan berikut.
+        </Lede>
+        <div className="mt-8">
+          <EmergencyContacts contacts={EMERGENCY.physical_danger} />
         </div>
         <div className="mt-10">
-          <Button onClick={onSafe} variant="quiet">Aku sudah aman dan ingin melanjutkan</Button>
+          <Button onClick={onSafe} variant="quiet">Aku sudah aman dan siap untuk membuat laporan</Button>
+        </div>
+      </div>
+    </Shell>
+  );
+}
+
+function SafeNowScreen({ onBack }: { onBack: () => void }) {
+  return (
+    <Shell>
+      <div className="flex flex-1 flex-col justify-center py-16">
+        <div className="mb-8 h-px w-12 bg-[color:var(--mist)]" />
+        <Title>Lega mendengarnya.</Title>
+        <Lede>
+          Kamu tidak perlu buru-buru. Kalau kamu mau berhenti di sini hari ini, itu tidak apa-apa—
+          brankas ini akan tetap ada besok, atau minggu depan.
+        </Lede>
+        <p className="mt-4 text-[15px] leading-relaxed text-[color:var(--muted)]">
+          Kalau kamu siap melangkah, langkah berikutnya kecil saja: menyimpan satu jejak, selagi
+          masih ada.
+        </p>
+        <div className="mt-10 space-y-3">
+          <Button href="/vault/">Aku siap, amankan bukti</Button>
+          <Button href="/" variant="quiet">Kembali ke awal</Button>
+          <button type="button" onClick={onBack} className="w-full py-3 text-[13px] text-[color:var(--muted)] transition-colors hover:text-[color:var(--warm)]">
+            ← Kembali ke kontak darurat
+          </button>
         </div>
       </div>
     </Shell>
@@ -47,7 +73,7 @@ function EmergencyScreen({ onSafe }: { onSafe: () => void }) {
 export default function TriageScreen() {
   const { activeCase, loading, error } = useActiveCase();
   const [step, setStep] = useState(0);
-  const [emergency, setEmergency] = useState(false);
+  const [safetyScreen, setSafetyScreen] = useState<'triage' | 'emergency' | 'safe'>('triage');
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
 
@@ -65,7 +91,8 @@ export default function TriageScreen() {
     }
   }
 
-  if (emergency) return <EmergencyScreen onSafe={() => setEmergency(false)} />;
+  if (safetyScreen === 'emergency') return <EmergencyScreen onSafe={() => setSafetyScreen('safe')} />;
+  if (safetyScreen === 'safe') return <SafeNowScreen onBack={() => setSafetyScreen('emergency')} />;
   if (loading) return <PageSkeleton cards={3} />;
   if (error) return <Shell><Notice>{error}</Notice></Shell>;
   if (!activeCase) {
@@ -88,7 +115,7 @@ export default function TriageScreen() {
       {step === 0 && (
         <>
           <Title>Apa yang terjadi?</Title>
-          <Lede>Pilih yang paling mendekati. Jawaban ini hanya ditambahkan ke kasus yang sedang kamu buka.</Lede>
+          <Lede>Pilih yang paling mendekati. Kamu tidak perlu menjelaskan detailnya.</Lede>
           <div className="mt-8 space-y-3">
             {INCIDENTS.map((incident) => (
               <Choice key={incident.value} onClick={() => void saveFact({ incident: incident.value })}>
@@ -101,7 +128,7 @@ export default function TriageScreen() {
       {step === 1 && (
         <>
           <Title>Di mana kamu melihatnya?</Title>
-          <Lede>Ini menjadi lingkup platform kasus dan membantu menyaring bukti yang sesuai.</Lede>
+          <Lede>Ini membantu kami menyiapkan laporan ke tempat yang tepat.</Lede>
           <div className="mt-8 space-y-3">
             {PLATFORMS.map((platform) => (
               <Choice key={platform.value} onClick={() => void saveFact({ platform: platform.value })}>
@@ -113,10 +140,13 @@ export default function TriageScreen() {
       )}
       {step === 2 && (
         <>
-          <Title>Apakah kamu sedang dalam bahaya fisik?</Title>
-          <Lede>Kalau iya, keselamatanmu lebih penting daripada bukti atau laporan.</Lede>
+          <Title>Saat ini, apakah kamu sedang dalam bahaya fisik?</Title>
+          <Lede>
+            Misalnya seseorang ada di dekatmu dan bisa menyakitimu. Kalau iya, itu yang kami urus
+            duluan.
+          </Lede>
           <div className="mt-8 space-y-3">
-            <Choice onClick={() => setEmergency(true)}>Iya, aku tidak merasa aman sekarang</Choice>
+            <Choice onClick={() => setSafetyScreen('emergency')}>Iya, aku tidak merasa aman sekarang</Choice>
             <Choice onClick={() => window.location.assign('/vault/')}>Tidak, aku aman secara fisik</Choice>
           </div>
         </>

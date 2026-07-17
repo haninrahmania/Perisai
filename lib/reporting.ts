@@ -45,6 +45,8 @@ export type OfficialDestination = {
 export type ReportTargetMetadata = {
   label: string;
   language: 'en' | 'id';
+  requiresIdentity: boolean;
+  handoff: string;
   destination: OfficialDestination | null;
 };
 
@@ -54,6 +56,8 @@ export const REPORT_TARGET_METADATA: Readonly<
   telegram: {
     label: 'Telegram',
     language: 'en',
+    requiresIdentity: false,
+    handoff: 'Kirim lewat aplikasi emailmu sendiri ke tim penyalahgunaan Telegram.',
     destination: {
       kind: 'mailto',
       href: 'mailto:abuse@telegram.org',
@@ -64,6 +68,8 @@ export const REPORT_TARGET_METADATA: Readonly<
   instagram: {
     label: 'Instagram',
     language: 'en',
+    requiresIdentity: false,
+    handoff: 'Salin naskah lalu ikuti formulir pelaporan resmi Instagram.',
     destination: {
       kind: 'url',
       href: 'https://www.facebook.com/help/instagram/1769410010008691/',
@@ -74,6 +80,8 @@ export const REPORT_TARGET_METADATA: Readonly<
   x: {
     label: 'X',
     language: 'en',
+    requiresIdentity: false,
+    handoff: 'Salin naskah lalu ikuti panduan pelaporan media intim di X.',
     destination: {
       kind: 'url',
       href: 'https://help.x.com/en/rules-and-policies/intimate-media',
@@ -84,6 +92,8 @@ export const REPORT_TARGET_METADATA: Readonly<
   tiktok: {
     label: 'TikTok',
     language: 'en',
+    requiresIdentity: false,
+    handoff: 'Salin naskah lalu ikuti panduan pelaporan resmi TikTok.',
     destination: {
       kind: 'url',
       href: 'https://www.tiktok.com/safety/en/reporting',
@@ -94,6 +104,8 @@ export const REPORT_TARGET_METADATA: Readonly<
   komdigi: {
     label: 'Komdigi',
     language: 'id',
+    requiresIdentity: true,
+    handoff: 'Salin naskah lalu isi sendiri formulir aduan resmi AduanKonten.id.',
     destination: {
       kind: 'url',
       href: 'https://aduankonten.id',
@@ -104,6 +116,8 @@ export const REPORT_TARGET_METADATA: Readonly<
   police_chronology: {
     label: 'Kronologi kepolisian',
     language: 'id',
+    requiresIdentity: true,
+    handoff: 'Cetak atau salin kronologi ini untuk dibawa ke SPKT kantor polisi terdekat.',
     destination: null,
   },
 };

@@ -1,5 +1,13 @@
 export type CrisisKind = 'physical_danger' | 'self_harm' | null;
 
+export type EmergencyContact = {
+  name: string;
+  contact: string;
+  note: string;
+  href?: string;
+  actionLabel?: string;
+};
+
 const SELF_HARM_RE = [
   /bunuh diri/, /ingin mati/, /pengen mati/, /pgn mati/, /mau mati aja/,
   /mengakhiri hidup/, /(gak|nggak|ga|tidak|engga|enggak) (sanggup|kuat|mau) hidup/,
@@ -26,15 +34,43 @@ export function detectCrisis(text: string): CrisisKind {
   return null;
 }
 
-export const EMERGENCY = {
+export const EMERGENCY: Record<Exclude<CrisisKind, null>, readonly EmergencyContact[]> = {
   physical_danger: [
-    { name: 'Polisi / Darurat', contact: '110', note: 'Jika kamu dalam bahaya sekarang.' },
-    { name: 'SAPA 129 (Kemen PPPA)', contact: '129', note: 'Layanan pengaduan kekerasan perempuan & anak.' },
+    {
+      name: 'Polisi 110',
+      contact: '110',
+      href: 'tel:110',
+      actionLabel: 'Telepon 110',
+      note: 'Untuk ancaman atau kekerasan yang sedang terjadi dan membutuhkan bantuan polisi segera. Panggilan ini gratis.',
+    },
+    {
+      name: 'SAPA 129 Kementerian PPPA',
+      contact: '129 · WhatsApp 08111-129-129',
+      href: 'https://laporsapa129.kemenpppa.go.id/',
+      actionLabel: 'Buka pilihan SAPA 129',
+      note: 'Untuk melaporkan kekerasan terhadap perempuan atau anak dan mendapat arahan perlindungan serta pendampingan.',
+    },
+    {
+      name: 'Komnas Perempuan',
+      contact: 'Pengaduan dan rujukan layanan',
+      href: 'https://komnasperempuan.go.id/',
+      actionLabel: 'Buka situs Komnas Perempuan',
+      note: 'Untuk mencatat pengaduan kekerasan terhadap perempuan dan meminta rujukan. Bukan layanan darurat atau pendampingan langsung.',
+    },
+    {
+      name: 'LBH APIK Jakarta',
+      contact: 'Pengaduan bantuan hukum',
+      href: 'https://www.lbhapik.org/pengaduan',
+      actionLabel: 'Buka pengaduan LBH APIK',
+      note: 'Bantuan hukum gratis bagi perempuan pencari keadilan di DKI Jakarta dan sekitarnya. Bukan layanan darurat.',
+    },
   ],
   self_harm: [
     {
       name: 'Healing119 Kementerian Kesehatan',
       contact: '119 ekstensi 8 / healing119.id',
+      href: 'tel:119',
+      actionLabel: 'Telepon 119',
       note: 'Pertolongan pertama psikologis untuk krisis dan pikiran bunuh diri.',
     },
     {

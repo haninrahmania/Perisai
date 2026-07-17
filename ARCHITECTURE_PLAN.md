@@ -151,3 +151,45 @@ implementation before they can understand what Perisai is doing.
 - **Accessibility and motion:** skeletons preserve the approximate page hierarchy, expose one
   `role="status"` label, remain `aria-hidden` as decorative blocks, and stop shimmering when the
   user requests reduced motion.
+
+## Landing orientation and physical-help restoration amendment
+
+The local-first rewrite preserved case creation but compressed the earlier supportive landing
+orientation and replaced the four-option human-help directory with two terse, triage-only phone
+cards. The landing page, triage emergency screen, and assistant crisis gate consequently present
+different safety options, and acknowledging safety makes the triage contacts disappear.
+
+- **Root cause:** physical-help content is duplicated in feature screens instead of deriving from
+  the existing crisis directory, while the landing rewrite treated case creation as the whole
+  introduction rather than one step in a sensitive support journey.
+- **Production owner:** the browser-local case store continues to own create/reopen behavior;
+  `lib/crisis.ts` owns the verified human-help directory; one shared contact surface owns its
+  accessible rendering; and triage owns only the temporary safety-screen state.
+- **Invariant:** physical help is reachable before a case is created, remains reachable after a
+  person says they are safe, and never sends case data. Telephone and official-site handoffs occur
+  only after the person explicitly follows that link. Existing local cases remain untouched.
+- **Reuse path:** restore the earlier empathetic orientation and safe-now transition, reuse the
+  current `Shell`, `Notice`, local case commands, crisis classifier, and official human-help
+  destinations, and render the same directory at every crisis surface.
+- **Deletion path:** delete the hard-coded triage and assistant contact cards. Do not restore
+  Supabase session creation, the nonexistent `/lindungi` route, pre-report AI access, a second
+  contact registry, or any new persistence for emergency-screen state.
+
+## Report-builder presentation restoration amendment
+
+The scoped local report owner correctly replaced remote generation, but its screen flattened the
+older target cards into terse tabs and removed the destination, language, identity, and handoff
+explanations that helped people understand what each choice would do.
+
+- **Production owner:** `lib/reporting.ts` owns target language, official destination, and identity
+  requirements; `ReportScreen` owns target/evidence selection and presents those facts before the
+  deterministic local builder is called.
+- **Invariant:** restoring the earlier guidance must not weaken one-case, one-target, explicit
+  eligible-evidence selection. Identity fields stay in component memory and every handoff remains
+  an explicit user action.
+- **Reuse path:** keep the current local draft/status lifecycle and `LetterView`, restore the older
+  card hierarchy and explanatory language around them, and derive all destination facts from
+  `REPORT_TARGET_METADATA` rather than duplicating another destination map.
+- **Deletion path:** replace the compressed target pills with descriptive cards; do not restore
+  the takedown API, Gemini-generated drafts, cached/static fallback letters, whole-vault selection,
+  or the former session-owned relationship value.
