@@ -1,14 +1,15 @@
 @import "tailwindcss";
 
 :root {
-  --night: #0f1d2b;
-  --surface: #1b3247;
-  --surface-2: #24405a;
-  --mist: #7fa8b8;
-  --warm: #e8e4dc;
-  --muted: #90a4b4;
-  --fill: #c4846a;
-  --line: rgba(232, 228, 220, 0.12);
+  --night: #f5f3ff;
+  --surface: #ffffff;
+  --surface-2: #aeaef6;
+  --mist: #785bc0;
+  --heading: #4d348a;
+  --warm: #6e5fa3;
+  --muted: #6d5a99;
+  --fill: #ff8d5c;
+  --line: rgba(78, 52, 138, 0.18);
 }
 
 html {
@@ -17,6 +18,8 @@ html {
 
 body {
   font-family: var(--font-body), system-ui, sans-serif;
+  color: var(--warm);
+  background: #adb5e5;
 }
 
 .font-display {
@@ -38,8 +41,8 @@ body {
 }
 
 .shield-grid {
-  background-image: linear-gradient(rgba(127, 168, 184, 0.14) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(127, 168, 184, 0.14) 1px, transparent 1px);
+  background-image: linear-gradient(rgba(78, 52, 138, 0.12) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(78, 52, 138, 0.12) 1px, transparent 1px);
   background-size: 12px 12px;
 }
 

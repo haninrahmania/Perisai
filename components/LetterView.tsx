@@ -89,7 +89,7 @@ export function LetterView({
   return (
     <div className="space-y-4">
       {placeholders.length > 0 && (
-        <div className="rounded-xl border border-[color:var(--fill)] bg-[rgba(196,132,106,0.08)] p-4">
+        <div className="rounded-xl border border-[color:var(--fill)] bg-[rgba(255,141,92,0.08)] p-4">
           <p className="text-[13px] font-medium text-[color:var(--fill)]">
             {remaining === 0 ? 'Semua bagian sudah terisi' : `${remaining} bagian perlu kamu isi`}
           </p>
@@ -129,7 +129,7 @@ export function LetterView({
           </div>
 
           {hasNik && (
-            <p className="mt-4 border-t border-[rgba(196,132,106,0.25)] pt-3 text-[12px] leading-relaxed text-[color:var(--muted)]">
+            <p className="mt-4 border-t border-[rgba(255,141,92,0.25)] pt-3 text-[12px] leading-relaxed text-[color:var(--muted)]">
               Kamu yang memutuskan kapan dan kepada siapa nama kamu diberikan. Perisai tidak pernah
               tahu — dan tidak bisa memberitahukannya ke siapa pun, karena memang tidak
               menyimpannya.
@@ -144,7 +144,7 @@ export function LetterView({
             /^\[[^\]\n]+\]$/.test(part) ? (
               <mark
                 key={i}
-                className="rounded bg-[rgba(196,132,106,0.22)] px-1 py-0.5 text-[color:var(--fill)] outline outline-1 outline-[rgba(196,132,106,0.45)]"
+                className="rounded bg-[rgba(255,141,92,0.22)] px-1 py-0.5 text-[color:var(--fill)] outline outline-1 outline-[rgba(255,141,92,0.45)]"
               >
                 {part}
               </mark>

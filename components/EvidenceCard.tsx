@@ -85,7 +85,7 @@ export default function EvidenceCard({ evidence, onDelete }: EvidenceCardProps) 
           )}
 
           {!revealed && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-[rgba(15,29,43,0.55)] px-6 text-center backdrop-blur-[2px]">
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-[rgba(245,243,255,0.78)] px-6 text-center backdrop-blur-[2px]">
               <ShieldIcon />
               <p className="text-[13px] leading-relaxed text-[color:var(--warm)]">
                 Ini tersimpan aman. Kamu tidak perlu melihatnya.
@@ -94,7 +94,7 @@ export default function EvidenceCard({ evidence, onDelete }: EvidenceCardProps) 
           )}
 
           {imgFailed && revealed && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-[rgba(15,29,43,0.8)] px-6 text-center">
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-[rgba(245,243,255,0.92)] px-6 text-center">
               <p className="text-[13px] text-[color:var(--muted)]">
                 Tautan pratinjau sudah kedaluwarsa.
               </p>
@@ -109,7 +109,7 @@ export default function EvidenceCard({ evidence, onDelete }: EvidenceCardProps) 
 
           <button
             onClick={() => setRevealed((r) => !r)}
-            className="absolute bottom-3 right-3 rounded-full border border-[color:var(--line)] bg-[rgba(15,29,43,0.85)] px-4 py-2.5 text-[13px] font-medium text-[color:var(--warm)] transition-colors hover:bg-[color:var(--surface-2)]"
+            className="absolute bottom-3 right-3 rounded-full border border-[color:var(--line)] bg-[rgba(245,243,255,0.94)] px-4 py-2.5 text-[13px] font-medium text-[color:var(--warm)] transition-colors hover:bg-[color:var(--surface-2)]"
           >
             {revealed ? 'Tutup lagi' : 'Lihat kalau kamu siap'}
           </button>

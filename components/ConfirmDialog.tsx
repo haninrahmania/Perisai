@@ -42,14 +42,14 @@ export function ConfirmDialog({
     <div
       role="dialog"
       aria-modal="true"
-      className="fixed inset-0 z-50 flex items-end justify-center bg-[rgba(15,29,43,0.75)] px-4 pb-4 pt-16 sm:items-center sm:pb-16"
+      className="fixed inset-0 z-50 flex items-end justify-center bg-[rgba(30,15,50,0.55)] px-4 pb-4 pt-16 sm:items-center sm:pb-16"
       onClick={() => !busy && onCancel()}
     >
       <div
         onClick={(e) => e.stopPropagation()}
         className="w-full max-w-[420px] rounded-2xl border border-[color:var(--line)] bg-[color:var(--surface)] p-6"
       >
-        <h2 className="font-display text-[20px] leading-snug text-[color:var(--warm)]">{title}</h2>
+        <h2 className="font-display text-[20px] leading-snug text-[color:var(--heading)]">{title}</h2>
         <div className="mt-3 space-y-2.5 text-[14px] leading-relaxed text-[color:var(--muted)]">
           {children}
         </div>
@@ -57,7 +57,7 @@ export function ConfirmDialog({
           <button
             onClick={onConfirm}
             disabled={busy}
-            className="w-full rounded-xl bg-[color:var(--mist)] px-5 py-4 text-[15px] font-medium text-[#0F1D2B] transition-colors hover:bg-[#96bccb] disabled:opacity-60"
+            className="w-full rounded-xl bg-[color:var(--mist)] px-5 py-4 text-[15px] font-medium text-white transition-colors hover:bg-[#8f6cd9] disabled:opacity-60"
           >
             {busy ? 'Menghapus…' : confirmLabel}
           </button>

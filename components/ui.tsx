@@ -50,7 +50,7 @@ export function Shell({
 
 export function Title({ children }: { children: ReactNode }) {
   return (
-    <h1 className="font-display text-[28px] font-semibold leading-tight tracking-tight text-[color:var(--warm)]">
+    <h1 className="font-display text-[28px] font-semibold leading-tight tracking-tight text-[color:var(--heading)]">
       {children}
     </h1>
   );
@@ -81,7 +81,7 @@ export function Button({
     'flex w-full items-center justify-center rounded-2xl px-5 py-4 text-[15px] font-medium transition-colors min-h-[56px] text-center';
   const styles =
     variant === 'primary'
-      ? 'bg-[color:var(--mist)] text-[#0F1D2B] hover:bg-[#96bccb] disabled:bg-[#2a4a60] disabled:text-[color:var(--muted)]'
+      ? 'bg-[color:var(--mist)] text-white hover:bg-[#8f6cd9] disabled:bg-[#adb5e5] disabled:text-[color:var(--muted)]'
       : 'border border-[color:var(--line)] bg-transparent text-[color:var(--warm)] hover:bg-[color:var(--surface)]';
 
   if (href && !disabled) {
